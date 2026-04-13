@@ -431,6 +431,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         // Ensure default content is shown, custom media is hidden
         findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
         findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_text_overlay)?.visibility = View.GONE
         stopCustomLoadingMedia()
         findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
         overlay.setBackgroundColor(Color.parseColor("#CC000000"))
@@ -470,28 +471,26 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         val file = File(mediaPath)
         if (!file.exists()) {
-            // File was deleted externally; clear the setting
             settings.loadingScreenMediaPath = ""
             settings.loadingScreenMediaType = ""
             return
         }
 
         val defaultContent = findViewById<View>(R.id.loading_default_content)
+        val customTextOverlay = findViewById<View>(R.id.loading_custom_text_overlay)
         val customImage = findViewById<ImageView>(R.id.loading_custom_image)
         val customVideo = findViewById<VideoView>(R.id.loading_custom_video)
         val overlay = findViewById<View>(R.id.loading_overlay)
 
-        // Hide default content unless user wants status text shown
-        if (settings.loadingScreenShowText) {
-            // Keep the default content visible but remove the ProgressBar background
-            // so text overlays on top of the custom media
-            defaultContent?.setBackgroundColor(Color.TRANSPARENT)
-        } else {
-            defaultContent?.visibility = View.GONE
-        }
+        // Always hide the default content when custom media is active
+        defaultContent?.visibility = View.GONE
         overlay?.setBackgroundColor(Color.BLACK)
 
-        // Apply aspect ratio setting
+        // Show the dedicated custom text overlay if the user wants status text
+        if (settings.loadingScreenShowText) {
+            customTextOverlay?.visibility = View.VISIBLE
+        }
+
         val keepRatio = settings.loadingScreenKeepAspectRatio
         customImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
 
@@ -500,7 +499,6 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 "image" -> {
                     customImage?.visibility = View.VISIBLE
                     Glide.with(this).load(file).into(customImage!!)
-                    // Ken Burns effect: subtle slow zoom for static images (only when keeping ratio)
                     if (keepRatio) {
                         customImage.let {
                             val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
@@ -525,14 +523,33 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                     customVideo?.setOnPreparedListener { mp ->
                         mp.isLooping = true
                         mp.setVolume(0f, 0f)
-                        // Stretch video to fill if aspect ratio is off
-                        if (!keepRatio) {
+
+                        if (keepRatio) {
+                            // Resize VideoView to match video's actual aspect ratio (like YouTube)
                             try {
-                                val lp = customVideo.layoutParams
-                                lp.width = FrameLayout.LayoutParams.MATCH_PARENT
-                                lp.height = FrameLayout.LayoutParams.MATCH_PARENT
-                                customVideo.layoutParams = lp
-                            } catch (_: Exception) {}
+                                val vw = mp.videoWidth
+                                val vh = mp.videoHeight
+                                if (vw > 0 && vh > 0) {
+                                    val cw = overlay?.width ?: return@setOnPreparedListener
+                                    val ch = overlay?.height ?: return@setOnPreparedListener
+                                    val videoRatio = vw.toFloat() / vh
+                                    val containerRatio = cw.toFloat() / ch
+                                    val lp = customVideo.layoutParams as FrameLayout.LayoutParams
+                                    if (videoRatio > containerRatio) {
+                                        // Wider video → fit to width, bars top/bottom
+                                        lp.width = cw
+                                        lp.height = (cw / videoRatio).toInt()
+                                    } else {
+                                        // Taller video → fit to height, bars left/right
+                                        lp.height = ch
+                                        lp.width = (ch * videoRatio).toInt()
+                                    }
+                                    lp.gravity = android.view.Gravity.CENTER
+                                    customVideo.layoutParams = lp
+                                }
+                            } catch (e: Exception) {
+                                AppLog.w("Could not resize video: ${e.message}")
+                            }
                         }
                     }
                     customVideo?.setOnErrorListener { _, _, _ ->
@@ -554,6 +571,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
         stopCustomLoadingMedia()
         findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_text_overlay)?.visibility = View.GONE
         findViewById<View>(R.id.loading_default_content)?.visibility = View.VISIBLE
         findViewById<View>(R.id.loading_overlay)?.setBackgroundColor(Color.parseColor("#CC000000"))
     }
