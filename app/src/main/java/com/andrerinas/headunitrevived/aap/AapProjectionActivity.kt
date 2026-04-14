@@ -76,15 +76,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 // If the decoder already rendered something, hide the overlay immediately
                 if (videoDecoder.lastFrameRenderedMs > 0) {
                     AppLog.i("Watchdog: Decoder is already rendering frames. Hiding overlay.")
-                    loadingOverlay.animate()
-                        .alpha(0f)
-                        .setDuration(300)
-                        .withEndAction {
-                            loadingOverlay.visibility = View.GONE
-                            loadingOverlay.alpha = 1f
-                            stopCustomLoadingMedia()
-                        }.start()
-                    overlayState = OverlayState.HIDDEN
+                    hideLoadingOverlay(loadingOverlay)
                     return
                 }
 
@@ -359,16 +351,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         videoDecoder.onFirstFrameListener = {
             runOnUiThread {
-                // Fade out the overlay for a smooth transition
-                loadingOverlay?.animate()
-                    ?.alpha(0f)
-                    ?.setDuration(300)
-                    ?.withEndAction {
-                        loadingOverlay?.visibility = View.GONE
-                        loadingOverlay?.alpha = 1f // Reset alpha for potential reconnecting overlay
-                        stopCustomLoadingMedia()
-                    }?.start()
-                overlayState = OverlayState.HIDDEN
+                hideLoadingOverlay(loadingOverlay)
 
                 // Show one-time gesture hint
                 if (!settings.gestureHintShown) {
@@ -452,16 +435,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val overlay = findViewById<View>(R.id.loading_overlay) ?: return
         val detail = findViewById<TextView>(R.id.overlay_detail)
         val button = findViewById<Button>(R.id.disconnect_button)
-        overlay.animate()
-            .alpha(0f)
-            .setDuration(300)
-            .withEndAction {
-                overlay.visibility = View.GONE
-                overlay.alpha = 1f
-                detail?.visibility = View.GONE
-                button?.visibility = View.GONE
-                stopCustomLoadingMedia()
-            }.start()
+        overlay.visibility = View.GONE
+        detail?.visibility = View.GONE
+        button?.visibility = View.GONE
+        stopCustomLoadingMedia()
     }
 
     private fun setupCustomLoadingScreen() {
@@ -567,6 +544,35 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
+    private fun hideLoadingOverlay(loadingOverlay: View?) {
+        overlayState = OverlayState.HIDDEN
+
+        // CRITICAL: Stop custom video FIRST — VideoView/SurfaceView has its own
+        // rendering layer that ignores parent alpha animations and can stay visible
+        // even when the parent is animated to alpha=0
+        stopCustomLoadingMedia()
+        findViewById<View>(R.id.loading_custom_video)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
+        findViewById<View>(R.id.loading_custom_text_overlay)?.visibility = View.GONE
+
+        // Now hide the overlay — if no custom video, do a smooth fade
+        val hasCustomVideo = settings.loadingScreenMediaType == "video"
+        if (hasCustomVideo) {
+            // Direct hide — animation won't work with SurfaceView
+            loadingOverlay?.visibility = View.GONE
+        } else {
+            // Smooth fade for images/GIFs
+            loadingOverlay?.animate()
+                ?.alpha(0f)
+                ?.setDuration(300)
+                ?.withEndAction {
+                    loadingOverlay?.visibility = View.GONE
+                    loadingOverlay?.alpha = 1f
+                }?.start()
+                ?: run { loadingOverlay?.visibility = View.GONE }
+        }
+    }
+
     private fun fallbackToDefaultOverlay() {
         findViewById<View>(R.id.loading_custom_image)?.visibility = View.GONE
         stopCustomLoadingMedia()
@@ -578,7 +584,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     private fun stopCustomLoadingMedia() {
         findViewById<VideoView>(R.id.loading_custom_video)?.let {
-            try { if (it.isPlaying) it.stopPlayback() } catch (_: Exception) {}
+            try {
+                if (it.isPlaying) it.stopPlayback()
+                it.suspend()
+            } catch (_: Exception) {}
         }
     }
 

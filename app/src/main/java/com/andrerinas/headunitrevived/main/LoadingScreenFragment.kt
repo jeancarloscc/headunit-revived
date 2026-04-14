@@ -125,6 +125,12 @@ class LoadingScreenFragment : Fragment() {
         toggleKeepAspectRatio?.setOnCheckedChangeListener { _, isChecked ->
             settings.loadingScreenKeepAspectRatio = isChecked
             updatePreviewScaleType()
+            // Reload preview to reflect the change immediately
+            val path = settings.loadingScreenMediaPath
+            val type = settings.loadingScreenMediaType
+            if (path.isNotEmpty() && type.isNotEmpty()) {
+                loadImagePreview(path, type)
+            }
         }
 
         // Select file
@@ -221,13 +227,15 @@ class LoadingScreenFragment : Fragment() {
         val file = File(path)
         if (!file.exists()) return
 
-        // For all types, show a thumbnail/still in the ImageView
+        // Apply aspect ratio setting BEFORE loading
+        val keepRatio = settings.loadingScreenKeepAspectRatio
+        previewImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
+
         previewImage?.visibility = View.VISIBLE
         try {
             if (type == "gif") {
                 Glide.with(this).asGif().load(file).into(previewImage!!)
             } else {
-                // For images AND videos, Glide can generate a thumbnail
                 Glide.with(this).load(file).into(previewImage!!)
             }
         } catch (e: Exception) {
