@@ -426,7 +426,7 @@
     <string name="loading_screen_dialog_title">Ecran de încărcare personalizat</string>
     <string name="loading_screen_select_file">Selectează fișier</string>
     <string name="loading_screen_remove">Elimină</string>
-    <string name="loading_screen_recommendation">Rezoluție recomandată: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Rezoluție recomandată: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Suportate: Imagini (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
     <string name="loading_screen_no_media">Niciun conținut personalizat selectat</string>
     <string name="loading_screen_file_too_large">Fișierul este prea mare (max 10 MB)</string>

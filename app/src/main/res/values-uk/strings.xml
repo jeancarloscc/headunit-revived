@@ -426,7 +426,7 @@
     <string name="loading_screen_dialog_title">Користувацький екран завантаження</string>
     <string name="loading_screen_select_file">Вибрати файл</string>
     <string name="loading_screen_remove">Видалити</string>
-    <string name="loading_screen_recommendation">Рекомендована роздільна здатність: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Рекомендована роздільна здатність: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Підтримувані: Зображення (PNG, JPG, BMP, WEBP, GIF) \u2022 Відео (MP4, MKV, WEBM, 3GP) \u2022 Макс: 10 МБ</string>
     <string name="loading_screen_no_media">Користувацький контент не вибрано</string>
     <string name="loading_screen_file_too_large">Файл завеликий (макс. 10 МБ)</string>

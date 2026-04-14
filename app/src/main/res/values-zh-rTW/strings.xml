@@ -425,7 +425,7 @@
     <string name="loading_screen_dialog_title">自訂載入畫面</string>
     <string name="loading_screen_select_file">選擇檔案</string>
     <string name="loading_screen_remove">移除</string>
-    <string name="loading_screen_recommendation">建議解析度：%1 00d7 %2</string>
+    <string name="loading_screen_recommendation">建議解析度：%1$dx%2$d</string>
     <string name="loading_screen_supported_formats">支援格式：圖片（PNG、JPG、BMP、WEBP、GIF）\u2022 影片（MP4、MKV、WEBM、3GP）\u2022 最大：10 MB</string>
     <string name="loading_screen_no_media">未選擇自訂媒體</string>
     <string name="loading_screen_file_too_large">檔案太大（最大 10 MB）</string>

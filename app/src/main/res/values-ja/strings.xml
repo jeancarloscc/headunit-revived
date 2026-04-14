@@ -426,7 +426,7 @@
     <string name="loading_screen_dialog_title">カスタム読み込み画面</string>
     <string name="loading_screen_select_file">ファイルを選択</string>
     <string name="loading_screen_remove">削除</string>
-    <string name="loading_screen_recommendation">推奨解像度：%1 00d7 %2</string>
+    <string name="loading_screen_recommendation">推奨解像度：%1$dx%2$d</string>
     <string name="loading_screen_supported_formats">対応形式：画像（PNG、JPG、BMP、WEBP、GIF）\u2022 動画（MP4、MKV、WEBM、3GP）\u2022 最大：10 MB</string>
     <string name="loading_screen_no_media">カスタムメディアが選択されていません</string>
     <string name="loading_screen_file_too_large">ファイルが大きすぎます（最大 10 MB）</string>

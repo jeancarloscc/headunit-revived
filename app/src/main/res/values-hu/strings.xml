@@ -424,7 +424,7 @@
     <string name="loading_screen_dialog_title">Egyéni betöltő képernyő</string>
     <string name="loading_screen_select_file">Fájl kiválasztása</string>
     <string name="loading_screen_remove">Eltávolítás</string>
-    <string name="loading_screen_recommendation">Ajánlott felbontás: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Ajánlott felbontás: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Támogatott: Képek (PNG, JPG, BMP, WEBP, GIF) \u2022 Videók (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
     <string name="loading_screen_no_media">Nincs egyéni tartalom kiválasztva</string>
     <string name="loading_screen_file_too_large">A fájl túl nagy (max 10 MB)</string>

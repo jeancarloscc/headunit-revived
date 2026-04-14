@@ -425,7 +425,7 @@
     <string name="loading_screen_dialog_title">شاشة تحميل مخصصة</string>
     <string name="loading_screen_select_file">اختر ملفًا</string>
     <string name="loading_screen_remove">إزالة</string>
-    <string name="loading_screen_recommendation">الدقة الموصى بها: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">الدقة الموصى بها: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">المدعومة: صور (PNG، JPG، BMP، WEBP، GIF) \u2022 فيديو (MP4، MKV، WEBM، 3GP) \u2022 الحد الأقصى: 10 ميغابايت</string>
     <string name="loading_screen_no_media">لم يتم تحديد وسائط مخصصة</string>
     <string name="loading_screen_file_too_large">الملف كبير جدًا (الحد الأقصى 10 ميغابايت)</string>

@@ -426,7 +426,7 @@
     <string name="loading_screen_dialog_title">Tela de carregamento personalizada</string>
     <string name="loading_screen_select_file">Selecionar arquivo</string>
     <string name="loading_screen_remove">Remover</string>
-    <string name="loading_screen_recommendation">Resolução recomendada: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Resolução recomendada: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Suportados: Imagens (PNG, JPG, BMP, WEBP, GIF) \u2022 Vídeos (MP4, MKV, WEBM, 3GP) \u2022 Máx: 10 MB</string>
     <string name="loading_screen_no_media">Nenhuma mídia personalizada selecionada</string>
     <string name="loading_screen_file_too_large">O arquivo é muito grande (máx 10 MB)</string>

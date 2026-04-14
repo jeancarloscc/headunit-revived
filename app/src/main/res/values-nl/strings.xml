@@ -425,7 +425,7 @@
     <string name="loading_screen_dialog_title">Aangepast laadscherm</string>
     <string name="loading_screen_select_file">Bestand kiezen</string>
     <string name="loading_screen_remove">Verwijderen</string>
-    <string name="loading_screen_recommendation">Aanbevolen resolutie: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Aanbevolen resolutie: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Ondersteund: Afbeeldingen (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
     <string name="loading_screen_no_media">Geen aangepast medium geselecteerd</string>
     <string name="loading_screen_file_too_large">Bestand is te groot (max 10 MB)</string>

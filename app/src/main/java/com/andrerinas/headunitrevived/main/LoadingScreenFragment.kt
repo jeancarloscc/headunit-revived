@@ -344,9 +344,12 @@ class LoadingScreenFragment : Fragment() {
         fullscreenOverlay?.alpha = 0f
         fullscreenOverlay?.animate()?.alpha(1f)?.setDuration(200)?.start()
 
+        // Apply aspect ratio setting to fullscreen image
+        val keepRatio = settings.loadingScreenKeepAspectRatio
+        fullscreenImage?.scaleType = if (keepRatio) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.FIT_XY
+
         try {
             if (type == "video") {
-                // For video fullscreen, use a SurfaceView + MediaPlayer
                 fullscreenImage?.visibility = View.GONE
                 setupFullscreenVideo(file)
             } else {
@@ -405,7 +408,33 @@ class LoadingScreenFragment : Fragment() {
                 }
             })
 
-            mp.setOnPreparedListener { it.start() }
+            mp.setOnPreparedListener { player ->
+                // Resize surface to respect aspect ratio if needed
+                if (settings.loadingScreenKeepAspectRatio) {
+                    try {
+                        val vw = player.videoWidth
+                        val vh = player.videoHeight
+                        if (vw > 0 && vh > 0) {
+                            val container = fullscreenOverlay ?: return@setOnPreparedListener
+                            val cw = container.width
+                            val ch = container.height
+                            val videoRatio = vw.toFloat() / vh
+                            val containerRatio = cw.toFloat() / ch
+                            val lp = surfaceView.layoutParams as FrameLayout.LayoutParams
+                            if (videoRatio > containerRatio) {
+                                lp.width = cw
+                                lp.height = (cw / videoRatio).toInt()
+                            } else {
+                                lp.height = ch
+                                lp.width = (ch * videoRatio).toInt()
+                            }
+                            lp.gravity = android.view.Gravity.CENTER
+                            surfaceView.layoutParams = lp
+                        }
+                    } catch (_: Exception) {}
+                }
+                player.start()
+            }
             mp.setOnErrorListener { _, _, _ ->
                 AppLog.e("Fullscreen video error")
                 true

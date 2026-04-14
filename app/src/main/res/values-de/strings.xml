@@ -429,7 +429,7 @@
     <string name="loading_screen_dialog_title">Benutzerdefinierter Ladebildschirm</string>
     <string name="loading_screen_select_file">Datei auswählen</string>
     <string name="loading_screen_remove">Entfernen</string>
-    <string name="loading_screen_recommendation">Empfohlene Auflösung: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Empfohlene Auflösung: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Unterstützt: Bilder (PNG, JPG, BMP, WEBP, GIF) \u2022 Videos (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
     <string name="loading_screen_no_media">Kein benutzerdefiniertes Medium ausgewählt</string>
     <string name="loading_screen_file_too_large">Datei ist zu groß (max. 10 MB)</string>

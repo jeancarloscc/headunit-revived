@@ -425,7 +425,7 @@
     <string name="loading_screen_dialog_title">Vlastní načítací obrazovka</string>
     <string name="loading_screen_select_file">Vybrat soubor</string>
     <string name="loading_screen_remove">Odebrat</string>
-    <string name="loading_screen_recommendation">Doporučené rozlišení: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Doporučené rozlišení: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Podporované: Obrázky (PNG, JPG, BMP, WEBP, GIF) \u2022 Videa (MP4, MKV, WEBM, 3GP) \u2022 Max: 10 MB</string>
     <string name="loading_screen_no_media">Není vybrán vlastní obsah</string>
     <string name="loading_screen_file_too_large">Soubor je příliš velký (max 10 MB)</string>

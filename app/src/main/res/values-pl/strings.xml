@@ -426,7 +426,7 @@
     <string name="loading_screen_dialog_title">Niestandardowy ekran ładowania</string>
     <string name="loading_screen_select_file">Wybierz plik</string>
     <string name="loading_screen_remove">Usuń</string>
-    <string name="loading_screen_recommendation">Zalecana rozdzielczość: %1 00d7 %2</string>
+    <string name="loading_screen_recommendation">Zalecana rozdzielczość: %1$dx%2$d</string>
     <string name="loading_screen_supported_formats">Obsługiwane: Obrazy (PNG, JPG, BMP, WEBP, GIF) \u2022 Wideo (MP4, MKV, WEBM, 3GP) \u2022 Maks: 10 MB</string>
     <string name="loading_screen_no_media">Nie wybrano niestandardowego pliku</string>
     <string name="loading_screen_file_too_large">Plik jest za duży (maks. 10 MB)</string>

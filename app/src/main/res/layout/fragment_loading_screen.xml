@@ -31,31 +31,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Info texts (always visible, before preview) -->
-                <TextView
-                    android:id="@+id/recommendation_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:id="@+id/aspect_ratio_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/loading_screen_supported_formats"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp" />
-
-                <!-- Preview area (fixed 200dp, not recalculated) -->
+                <!-- Preview area (fixed 200dp) -->
                 <FrameLayout
                     android:id="@+id/preview_area"
                     android:layout_width="match_parent"
@@ -128,6 +104,31 @@
                     android:textSize="12sp"
                     android:gravity="center"
                     android:visibility="gone" />
+
+                <!-- Info texts (below hint, always visible) -->
+                <TextView
+                    android:id="@+id/recommendation_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/aspect_ratio_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/loading_screen_supported_formats"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
 
                 <!-- Toggles -->
                 <LinearLayout
@@ -254,7 +255,7 @@
             android:id="@+id/fullscreen_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+            android:scaleType="fitCenter" />
 
         <LinearLayout
             android:id="@+id/fullscreen_status_text"
