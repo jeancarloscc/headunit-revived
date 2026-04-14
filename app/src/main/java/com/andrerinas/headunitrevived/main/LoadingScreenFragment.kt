@@ -38,6 +38,8 @@ class LoadingScreenFragment : Fragment() {
     private var toggleContainer: View? = null
     private var toggleShowText: Switch? = null
     private var toggleKeepAspectRatio: Switch? = null
+    private var toggleLoopContainer: View? = null
+    private var toggleLoopVideo: Switch? = null
     private var btnRemove: View? = null
     private var fullscreenOverlay: FrameLayout? = null
     private var fullscreenImage: ImageView? = null
@@ -113,6 +115,8 @@ class LoadingScreenFragment : Fragment() {
         })
 
         toggleKeepAspectRatio = view.findViewById(R.id.toggle_keep_aspect_ratio)
+        toggleLoopContainer = view.findViewById(R.id.toggle_loop_container)
+        toggleLoopVideo = view.findViewById(R.id.toggle_loop_video)
 
         // Toggles
         toggleShowText?.isChecked = settings.loadingScreenShowText
@@ -125,12 +129,16 @@ class LoadingScreenFragment : Fragment() {
         toggleKeepAspectRatio?.setOnCheckedChangeListener { _, isChecked ->
             settings.loadingScreenKeepAspectRatio = isChecked
             updatePreviewScaleType()
-            // Reload preview to reflect the change immediately
             val path = settings.loadingScreenMediaPath
             val type = settings.loadingScreenMediaType
             if (path.isNotEmpty() && type.isNotEmpty()) {
                 loadImagePreview(path, type)
             }
+        }
+
+        toggleLoopVideo?.isChecked = settings.loadingScreenLoopVideo
+        toggleLoopVideo?.setOnCheckedChangeListener { _, isChecked ->
+            settings.loadingScreenLoopVideo = isChecked
         }
 
         // Select file
@@ -194,6 +202,7 @@ class LoadingScreenFragment : Fragment() {
             toggleContainer?.visibility = View.VISIBLE
             btnRemove?.visibility = View.VISIBLE
             fullscreenHint?.visibility = View.VISIBLE
+            toggleLoopContainer?.visibility = if (type == "video") View.VISIBLE else View.GONE
             loadImagePreview(path, type)
         } else {
             previewPlaceholder?.visibility = View.VISIBLE
@@ -201,6 +210,7 @@ class LoadingScreenFragment : Fragment() {
             toggleContainer?.visibility = View.GONE
             btnRemove?.visibility = View.GONE
             fullscreenHint?.visibility = View.GONE
+            toggleLoopContainer?.visibility = View.GONE
             if (path.isNotEmpty()) {
                 settings.loadingScreenMediaPath = ""
                 settings.loadingScreenMediaType = ""

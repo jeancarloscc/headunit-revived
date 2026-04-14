@@ -498,7 +498,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                     customVideo?.visibility = View.VISIBLE
                     customVideo?.setVideoPath(file.absolutePath)
                     customVideo?.setOnPreparedListener { mp ->
-                        mp.isLooping = true
+                        mp.isLooping = settings.loadingScreenLoopVideo
                         mp.setVolume(0f, 0f)
 
                         if (keepRatio) {

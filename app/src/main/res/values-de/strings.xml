@@ -441,4 +441,5 @@
     <string name="loading_screen_keep_aspect_ratio">Seitenverhältnis beibehalten</string>
     <string name="loading_screen_recommended_aspect_ratio">Empfohlenes Seitenverhältnis: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Tippen Sie auf die Vorschau, um sie im Vollbild zu sehen</string>
+    <string name="loading_screen_loop_video">Kurze Animationen wiederholen</string>
 </resources>

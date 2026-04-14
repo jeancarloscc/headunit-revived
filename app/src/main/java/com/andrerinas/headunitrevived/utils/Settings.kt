@@ -428,6 +428,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("loading-screen-keep-aspect-ratio", true)
         set(value) { prefs.edit().putBoolean("loading-screen-keep-aspect-ratio", value).apply() }
 
+    var loadingScreenLoopVideo: Boolean
+        get() = prefs.getBoolean("loading-screen-loop-video", true)
+        set(value) { prefs.edit().putBoolean("loading-screen-loop-video", value).apply() }
+
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()

@@ -438,4 +438,5 @@
     <string name="loading_screen_keep_aspect_ratio">Сохранять соотношение сторон</string>
     <string name="loading_screen_recommended_aspect_ratio">Рекомендуемое соотношение сторон: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Нажмите на превью, чтобы увидеть в полный экран</string>
+    <string name="loading_screen_loop_video">Повторять короткие анимации</string>
 </resources>
