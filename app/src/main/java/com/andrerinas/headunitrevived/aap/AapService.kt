@@ -1466,6 +1466,13 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, createNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        } else {
+            startForeground(1, createNotification())
+        }
+
         // Handle stop before re-posting the notification to avoid a flash
         if (intent?.action == ACTION_STOP_SERVICE) {
             AppLog.i("Stop action received. Broadcasting finish request to activities.")
@@ -1480,18 +1487,7 @@ class AapService : Service(), UsbReceiver.Listener {
         }
 
         // Route MEDIA_BUTTON intents to the active MediaSession.
-        // This is the AndroidX-recommended pattern: MediaButtonReceiver (manifest)
-        // forwards the intent to this service, and handleIntent() dispatches it
-        // to the MediaSession callback. This works on Android 8+ where implicit
-        // broadcasts to manifest-registered receivers are restricted.
         mediaSession?.let { MediaButtonReceiver.handleIntent(it, intent) }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(1, createNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-        } else {
-            startForeground(1, createNotification())
-        }
         // Launch the UI after boot.
         // Direct startActivity() is silently blocked on MIUI/HyperOS even from
         // a foreground service. We use an overlay window trampoline: creating a

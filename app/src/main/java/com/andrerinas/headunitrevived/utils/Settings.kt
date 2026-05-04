@@ -47,18 +47,18 @@ class Settings(context: Context) {
 
     var lastKnownLocation: Location
         get() {
-            val latitude = prefs.getLong("last-loc-latitude", (32.0864169).toLong())
-            val longitude = prefs.getLong("last-loc-longitude", (34.7557871).toLong())
+            val latitudeBits = prefs.getLong("last-loc-latitude", (32.0864169).toRawBits())
+            val longitudeBits = prefs.getLong("last-loc-longitude", (34.7557871).toRawBits())
 
             val location = Location("")
-            location.latitude = latitude.toDouble()
-            location.longitude = longitude.toDouble()
+            location.latitude = java.lang.Double.longBitsToDouble(latitudeBits)
+            location.longitude = java.lang.Double.longBitsToDouble(longitudeBits)
             return location
         }
         set(location) {
             prefs.edit()
-                .putLong("last-loc-latitude", location.latitude.toLong())
-                .putLong("last-loc-longitude", location.longitude.toLong())
+                .putLong("last-loc-latitude", location.latitude.toRawBits())
+                .putLong("last-loc-longitude", location.longitude.toRawBits())
                 .apply()
         }
 
