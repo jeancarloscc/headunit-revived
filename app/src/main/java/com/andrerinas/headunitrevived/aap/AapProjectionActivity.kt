@@ -65,6 +65,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private var overlayState = OverlayState.STARTING
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
+    /**
+     * Ken Burns scale animation applied to a static image loading screen.
+     * Stored in a field so it can be cancelled when the loading overlay is
+     * torn down or the activity is destroyed — otherwise the infinite-repeat
+     * animator keeps consuming frame callbacks even when the view is gone.
+     */
+    private var kenBurnsAnimator: ObjectAnimator? = null
+
     private var initialX = 0f
     private var initialY = 0f
     private var isPotentialGesture = false
@@ -536,11 +544,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             when (mediaType) {
                 "image" -> {
                     customImage?.visibility = View.VISIBLE
-                    Glide.with(this).load(file).into(customImage!!)
+                    customImage?.let { Glide.with(this).load(file).into(it) }
                     if (keepRatio) {
-                        customImage.let {
+                        customImage?.let { imageView ->
+                            kenBurnsAnimator?.cancel()
                             val scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
-                                it,
+                                imageView,
                                 PropertyValuesHolder.ofFloat("scaleX", 1.0f, 1.05f),
                                 PropertyValuesHolder.ofFloat("scaleY", 1.0f, 1.05f)
                             )
@@ -548,12 +557,13 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                             scaleAnim.repeatMode = ObjectAnimator.REVERSE
                             scaleAnim.repeatCount = ObjectAnimator.INFINITE
                             scaleAnim.start()
+                            kenBurnsAnimator = scaleAnim
                         }
                     }
                 }
                 "gif" -> {
                     customImage?.visibility = View.VISIBLE
-                    Glide.with(this).asGif().load(file).into(customImage!!)
+                    customImage?.let { Glide.with(this).asGif().load(file).into(it) }
                 }
                 "video" -> {
                     customVideo?.visibility = View.VISIBLE
@@ -644,6 +654,8 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private fun stopCustomLoadingMedia() {
+        kenBurnsAnimator?.cancel()
+        kenBurnsAnimator = null
         findViewById<VideoView>(R.id.loading_custom_video)?.let {
             try {
                 if (it.isPlaying) it.stopPlayback()
@@ -1041,6 +1053,12 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             unregisterReceiver(keyEventReceiver)
             isKeyEventReceiverRegistered = false
         }
+        // Defensive cleanup: if the activity is destroyed while the loading
+        // overlay is still up (early connection failure, system kill,
+        // configuration change before first frame), the VideoView's surface
+        // and the Ken Burns animator outlive the view hierarchy briefly.
+        // stopCustomLoadingMedia releases both.
+        stopCustomLoadingMedia()
         AppLog.i("AapProjectionActivity.onDestroy called. isFinishing=$isFinishing")
         videoDecoder.dimensionsListener = null
     }

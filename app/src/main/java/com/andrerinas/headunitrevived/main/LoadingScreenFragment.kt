@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.andrerinas.headunitrevived.App
 import com.andrerinas.headunitrevived.R
@@ -25,6 +26,9 @@ import com.andrerinas.headunitrevived.utils.PickMediaContract
 import com.andrerinas.headunitrevived.utils.Settings
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class LoadingScreenFragment : Fragment() {
@@ -274,14 +278,6 @@ class LoadingScreenFragment : Fragment() {
             return
         }
 
-        try {
-            val size = contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1
-            if (size > 10L * 1024 * 1024) {
-                Toast.makeText(ctx, R.string.loading_screen_file_too_large, Toast.LENGTH_SHORT).show()
-                return
-            }
-        } catch (_: Exception) {}
-
         val ext = when (mimeType) {
             "image/gif" -> "gif"; "image/png" -> "png"; "image/jpeg" -> "jpg"
             "image/webp" -> "webp"; "image/bmp" -> "bmp"
@@ -291,27 +287,54 @@ class LoadingScreenFragment : Fragment() {
         }
 
         val dir = File(ctx.filesDir, "loading_media")
-        if (!dir.exists()) dir.mkdirs()
-        dir.listFiles()?.forEach { it.delete() }
-
         val destFile = File(dir, "loading_screen.$ext")
-        try {
-            contentResolver.openInputStream(uri)?.use { input ->
-                destFile.outputStream().use { output -> input.copyTo(output) }
-            } ?: throw Exception("null input stream")
-        } catch (e: Exception) {
-            AppLog.e("Copy failed: ${e.message}")
-            Toast.makeText(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
-            return
+
+        // The media file can be up to 10 MB and may live on slow storage (SD
+        // card, cloud-backed document provider). Run the size probe, the
+        // previous-media cleanup and the actual copy on Dispatchers.IO so the
+        // main thread doesn't stall and trigger an ANR. Result codes are
+        // brought back to the main thread to update settings + UI.
+        viewLifecycleOwner.lifecycleScope.launch {
+            val outcome = withContext(Dispatchers.IO) {
+                try {
+                    val size = try {
+                        contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: -1L
+                    } catch (_: Exception) { -1L }
+                    if (size > 10L * 1024 * 1024) return@withContext CopyOutcome.TOO_LARGE
+
+                    if (!dir.exists()) dir.mkdirs()
+                    dir.listFiles()?.forEach { it.delete() }
+
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        destFile.outputStream().use { output -> input.copyTo(output) }
+                    } ?: return@withContext CopyOutcome.FAILED
+                    CopyOutcome.OK
+                } catch (e: Exception) {
+                    AppLog.e("Copy failed: ${e.message}")
+                    CopyOutcome.FAILED
+                }
+            }
+
+            when (outcome) {
+                CopyOutcome.TOO_LARGE -> {
+                    Toast.makeText(ctx, R.string.loading_screen_file_too_large, Toast.LENGTH_SHORT).show()
+                }
+                CopyOutcome.FAILED -> {
+                    Toast.makeText(ctx, R.string.loading_screen_file_error, Toast.LENGTH_SHORT).show()
+                }
+                CopyOutcome.OK -> {
+                    settings.loadingScreenMediaPath = destFile.absolutePath
+                    settings.loadingScreenMediaType = mediaType
+
+                    releaseMediaPlayers()
+                    try { previewImage?.let { Glide.with(this@LoadingScreenFragment).clear(it) } } catch (_: Exception) {}
+                    refreshUI()
+                }
+            }
         }
-
-        settings.loadingScreenMediaPath = destFile.absolutePath
-        settings.loadingScreenMediaType = mediaType
-
-        releaseMediaPlayers()
-        try { previewImage?.let { Glide.with(this).clear(it) } } catch (_: Exception) {}
-        refreshUI()
     }
+
+    private enum class CopyOutcome { OK, TOO_LARGE, FAILED }
 
     private fun removeMedia() {
         val path = settings.loadingScreenMediaPath
