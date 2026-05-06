@@ -205,6 +205,12 @@ class MainActivity : BaseActivity() {
         autoConnectInProgress = true
         hasAdvancedToActiveState = false
         autoConnectStatusText = customStatusText
+        // Hand the status text off to AapProjectionActivity so its own loading
+        // screen continues to show the same context-specific label after the
+        // handshake completes and AAP takes over the UI. AAP reads and clears
+        // this on its first launch; we always overwrite it here (even with
+        // null) so a stale value from a prior attempt can't leak across.
+        AapProjectionActivity.pendingStatusText = customStatusText
         showAutoConnectOverlay()
     }
 
@@ -271,6 +277,13 @@ class MainActivity : BaseActivity() {
         autoConnectInProgress = false
         hasAdvancedToActiveState = false
         autoConnectStatusText = null
+        if (!success) {
+            // Failure path: AAP is not going to launch, so clear the handover
+            // value so it can't appear on a later, unrelated connection. On
+            // success we leave it alone — AAP either already consumed it in
+            // onCreate or is about to.
+            AapProjectionActivity.pendingStatusText = null
+        }
         if (success) {
             // On success the projection activity will cover our overlay almost
             // immediately. Hiding without an animation avoids the fade competing

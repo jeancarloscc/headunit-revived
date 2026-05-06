@@ -491,6 +491,18 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     }
 
     private fun setupCustomLoadingScreen() {
+        // Apply any context-specific status text handed over by MainActivity
+        // (e.g. "Connecting to Pixel 8…") to BOTH the default-content text and
+        // the custom-media text overlay. Done before the early-return paths so
+        // the override applies whether or not custom media is configured. Read
+        // once and cleared so the value can't leak into a later connection.
+        val handover = pendingStatusText
+        pendingStatusText = null
+        if (handover != null) {
+            findViewById<TextView>(R.id.overlay_text)?.text = handover
+            findViewById<TextView>(R.id.loading_custom_text)?.text = handover
+        }
+
         val mediaPath = settings.loadingScreenMediaPath
         val mediaType = settings.loadingScreenMediaType
         if (mediaPath.isEmpty() || mediaType.isEmpty()) return
@@ -1035,6 +1047,15 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
     companion object {
         const val EXTRA_FOCUS = "focus"
+
+        /**
+         * Optional one-shot override for the loading-screen status text. Set by
+         * MainActivity when it begins an auto-connect with a context-specific
+         * label (e.g. "Connecting to Pixel 8…" from the Nearby selector). Read
+         * and cleared by [setupCustomLoadingScreen] on the next launch so the
+         * value can't leak into a subsequent connection attempt.
+         */
+        @Volatile var pendingStatusText: String? = null
 
         fun intent(context: Context): Intent {
             val aapIntent = Intent(context, AapProjectionActivity::class.java)
