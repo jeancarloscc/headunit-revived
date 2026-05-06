@@ -219,16 +219,18 @@ class NativeAaHandshakeManager(
             for (device in devicesToPoke) {
                 if (!isRunning || !isActive) break
                 AppLog.i("NativeAA: Attempting active A2DP poke to device: ${device.name} (${device.address})...")
+                var socket: BluetoothSocket? = null
                 try {
-                    val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
                     AppLog.i("NativeAA: Calling socket.connect() for ${device.name}...")
                     socket.connect()
                     AppLog.i("NativeAA: Successfully poked ${device.name}. Keeping socket alive for 15s...")
                     delay(15000)
-                    socket.close()
-                    AppLog.i("NativeAA: Poke socket for ${device.name} closed.")
                 } catch (e: Exception) {
                     AppLog.d("NativeAA: Poke for ${device.name} failed (normal if device disconnected): ${e.message}")
+                } finally {
+                    try { socket?.close() } catch (e: Exception) {}
+                    AppLog.d("NativeAA: Poke socket for ${device.name} closed in finally.")
                 }
             }
         }
@@ -253,16 +255,18 @@ class NativeAaHandshakeManager(
             pokeJob?.cancel()
             pokeJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-ManualWakeup")) {
                 AppLog.i("NativeAA: Attempting manual A2DP poke to ${device.name}...")
+                var socket: BluetoothSocket? = null
                 try {
-                    val socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
+                    socket = device.createRfcommSocketToServiceRecord(A2DP_SOURCE_UUID)
                     AppLog.i("NativeAA: Calling socket.connect() for ${device.name}...")
                     socket.connect()
                     AppLog.i("NativeAA: Successfully poked ${device.name}. Keeping socket alive for 20s...")
                     delay(20000)
-                    socket.close()
-                    AppLog.i("NativeAA: Manual poke socket for ${device.name} closed.")
                 } catch (e: Exception) {
                     AppLog.d("NativeAA: Manual poke for ${device.name} failed: ${e.message}")
+                } finally {
+                    try { socket?.close() } catch (e: Exception) {}
+                    AppLog.i("NativeAA: Manual poke socket for ${device.name} closed in finally.")
                 }
             }
         } catch (e: Exception) {
