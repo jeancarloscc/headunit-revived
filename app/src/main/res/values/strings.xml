@@ -66,6 +66,9 @@
     <string name="bluetooth_address_s">Bluetooth address</string>
     <string name="enter_bluetooth_mac">Enter bluetooth MAC</string>
     <string name="reset">Reset</string>
+    <string name="reset_settings">Reset to Defaults</string>
+    <string name="reset_settings_confirm">Are you sure you want to reset all settings to their default values? This will restart the app.</string>
+    <string name="reset_settings_description">Clears all configuration, cached data and auto-connect preferences. The app will restart to apply the factory defaults.</string>
     <string name="gps_for_navigation">Gps for navigation</string>
     <string name="gps_for_navigation_description">Use Gps for navigation</string>
     <string name="enabled">Enabled</string>

@@ -11,7 +11,7 @@ import com.andrerinas.headunitrevived.aap.protocol.proto.Control
 import com.andrerinas.headunitrevived.app.UsbAttachedActivity
 import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 
-class Settings(context: Context) {
+class Settings(private val context: Context) {
 
     private val _prefs: SharedPreferences? by lazy {
         try {
@@ -480,6 +480,19 @@ class Settings(context: Context) {
     @SuppressLint("ApplySharedPref")
     fun commit() {
         prefs.edit().commit()
+    }
+
+    @SuppressLint("ApplySharedPref")
+    fun reset() {
+        prefs.edit().clear().commit()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            syncAutoStartOnBootToDeviceStorage(context, false)
+            syncAutoStartOnScreenOnToDeviceStorage(context, false)
+            syncAutoStartOnUsbToDeviceStorage(context, false)
+            syncAutoStartOnWifiToDeviceStorage(context, false)
+            syncListenForUsbDevicesToDeviceStorage(context, true)
+            syncAutoStartBtMacToDeviceStorage(context, "")
+        }
     }
 
     enum class Resolution(val id: Int, val resName: String, val width: Int, val height: Int, val codec: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType?) {

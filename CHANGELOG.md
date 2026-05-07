@@ -1,4 +1,9 @@
 # Changelog
+### v.3.0.0-alpha
+- Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
+- Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
+- Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
+
 ### v.2.2.2
 - Fixed: Exit on disconnect now stops the carmode too
 - Fixed: Exit intent not closing the app

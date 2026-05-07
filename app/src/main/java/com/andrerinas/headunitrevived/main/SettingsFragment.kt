@@ -1093,6 +1093,30 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        // --- Reset Settings ---
+        items.add(SettingItem.CategoryHeader("resetSettingsCategory", R.string.reset))
+        items.add(SettingItem.SettingEntry(
+            stableId = "resetSettings",
+            nameResId = R.string.reset_settings,
+            value = getString(R.string.reset_settings_description),
+            onClick = {
+                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                    .setTitle(R.string.reset_settings)
+                    .setMessage(R.string.reset_settings_confirm)
+                    .setPositiveButton(R.string.reset) { _, _ ->
+                        settings.reset()
+                        
+                        // Proper App Restart
+                        val intent = requireActivity().packageManager.getLaunchIntentForPackage(requireActivity().packageName)
+                        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        requireActivity().startActivity(intent)
+                        requireActivity().finish()
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
+            }
+        ))
+
         // --- Debug Settings ---
         items.add(SettingItem.CategoryHeader("debug", R.string.category_debug))
 
