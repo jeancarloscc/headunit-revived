@@ -748,14 +748,37 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private fun enterPiP() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                val params = android.app.PictureInPictureParams.Builder()
-                    // Default aspect ratio for AA (usually 16:9 or 16:10)
-                    .setAspectRatio(android.util.Rational(videoDecoder.videoWidth.coerceAtLeast(1), videoDecoder.videoHeight.coerceAtLeast(1)))
-                    .build()
-                enterPictureInPictureMode(params)
+                var width = videoDecoder.videoWidth.coerceAtLeast(1).toFloat()
+                var height = videoDecoder.videoHeight.coerceAtLeast(1).toFloat()
+                val ratio = width / height
+                
+                // Android supports PiP aspect ratios between 1/2.39 (0.418) and 2.39.
+                // If we exceed this (e.g. on ultrawide headunits), PiP entry will fail.
+                if (ratio > 2.39f) {
+                    AppLog.i("PiP: Aspect ratio $ratio is too wide, clamping to 2.39")
+                    width = height * 2.39f
+                } else if (ratio < 0.418f) {
+                    AppLog.i("PiP: Aspect ratio $ratio is too narrow, clamping to 0.418")
+                    height = width / 0.418f
+                }
+
+                val paramsBuilder = android.app.PictureInPictureParams.Builder()
+                    .setAspectRatio(android.util.Rational(width.toInt(), height.toInt()))
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    // Smooth transition for Android 12+
+                    paramsBuilder.setAutoEnterEnabled(true)
+                    paramsBuilder.setSeamlessResizeEnabled(true)
+                }
+
+                enterPictureInPictureMode(paramsBuilder.build())
             } catch (e: Exception) {
                 AppLog.e("Failed to enter PiP mode: ${e.message}")
+                e.printStackTrace()
+                Toast.makeText(this, "PiP failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            AppLog.w("PiP mode not supported on this Android version (SDK < 26)")
         }
     }
 

@@ -400,8 +400,19 @@ class VideoDecoder(private val settings: Settings) {
             if (isAllwinner) {
                 // [BUG_FIX] Allwinner decoders often fail on adaptive playback initialization,
                 // leading to a SIGABRT in CodecLooper when the surface reconfigures for padding (e.g. 1080->1088).
-                AppLog.i("Decoder: Disabling adaptive-playback for Allwinner chipset stability.")
+                AppLog.i("Decoder: Applying Allwinner stability patches.")
                 format.setInteger("adaptive-playback", 0)
+                
+                if (mimeType == CodecType.H265.mimeType) {
+                    AppLog.w("CAUTION: Allwinner H.265 is known to be unstable. If the app crashes, please switch to H.264 in settings.")
+                    // Force macroblock alignment (multiple of 16) to prevent re-padding crash
+                    val alignedHeight = ((height + 15) / 16) * 16
+                    if (alignedHeight != height) {
+                        AppLog.i("Decoder: Aligning Allwinner H.265 height to $alignedHeight (was $height)")
+                        format.setInteger(MediaFormat.KEY_HEIGHT, alignedHeight)
+                    }
+                }
+                
                 // Explicitly set color format to surface to help ACodec
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             }
