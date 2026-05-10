@@ -67,7 +67,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - **Self-mode on Android 10 (Q) and below:** Google has disabled the automatic wireless projection startup for Android 10 and below in Android Auto versions 16.4 and higher. While Self-mode still work on newer Android versions, it is currently impossible to trigger projection on Android 10 with recent Google app updates.
 
 ## Changelog
-### v.2.3.0-alpha
+### v.2.3.0-beta
 - Added some new buttons for keymap
 - Fixed 3 Fatal errors
 - Fixed video decoder settings for allwinner devices
