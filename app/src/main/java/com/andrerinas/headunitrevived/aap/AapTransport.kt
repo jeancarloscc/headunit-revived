@@ -32,6 +32,7 @@ import com.andrerinas.headunitrevived.utils.AppLog
 import com.andrerinas.headunitrevived.utils.Settings
 import com.andrerinas.headunitrevived.aap.AapService
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
+import com.andrerinas.headunitrevived.aap.protocol.proto.MediaPlayback
 import javax.net.ssl.SSLEngineResult
 
 /**
@@ -49,6 +50,8 @@ import javax.net.ssl.SSLEngineResult
  * @param settings User preferences (SSL mode, key mappings, microphone sample rate, …).
  * @param notification Background notification handle; updated as connection state changes.
  * @param context Application context; used for broadcasts and system services.
+ * @param onAaMediaMetadata Optional callback when the phone sends media metadata (now-playing).
+ * @param onAaPlaybackStatus Optional callback when the phone sends playback status/position.
  * @param externalSsl Optional singleton [AapSslContext] whose internal [javax.net.ssl.SSLContext]
  *   (and its `ClientSessionContext` session cache) survives across [AapTransport] recreations.
  *   When provided on the Java-SSL path, JSSE can resume the previous TLS session on reconnect,
@@ -63,6 +66,8 @@ class AapTransport(
         internal val settings: Settings,
         private val notification: BackgroundNotification,
         private val context: Context,
+        private val onAaMediaMetadata: ((MediaPlayback.MediaMetaData) -> Unit)? = null,
+        private val onAaPlaybackStatus: ((MediaPlayback.MediaPlaybackStatus) -> Unit)? = null,
         private val externalSsl: AapSslContext? = null)
     : MicRecorder.Listener {
 
@@ -90,9 +95,7 @@ class AapTransport(
     private val micRecorder: MicRecorder = MicRecorder(settings.micSampleRate, context)
     private val sessionIds = SparseIntArray(4)
     private val startedSensors = HashSet<Int>(4)
-    private val keyCodes = settings.keyCodes.entries.associateTo(mutableMapOf()) {
-        it.value to it.key
-    }
+    private val keyCodes = mutableMapOf<Int, Int>()
     private val modeManager: UiModeManager =
         context.getSystemService(UI_MODE_SERVICE) as UiModeManager
     private var connection: AccessoryConnection? = null
@@ -106,6 +109,7 @@ class AapTransport(
     @Volatile var wasUserExit: Boolean = false
     @Volatile var onQuit: ((Boolean) -> Unit)? = null
     var onAudioFocusStateChanged: ((Boolean) -> Unit)? = null
+    var onUpdateUiConfigReplyReceived: (() -> Unit)? = null
     private var pollHandler: Handler? = null
     private val pollHandlerCallback = Handler.Callback {
         val readInstance = aapRead
@@ -188,6 +192,7 @@ class AapTransport(
 
         AppLog.i("AapTransport quitting (clean=$clean)")
         cb.invoke(clean)
+        micRecorder.stop()
         micRecorder.listener = null
         pollThread?.quit()
         sendThread?.quit()
@@ -260,8 +265,9 @@ class AapTransport(
             aapAudio,
             aapVideo,
             settings,
-            notification,
-            context
+            context,
+            onAaMediaMetadata,
+            onAaPlaybackStatus
         )
         pollHandler?.sendEmptyMessage(MSG_POLL)
     }
@@ -381,10 +387,9 @@ class AapTransport(
     }
 
     fun send(keyCode: Int, isPress: Boolean) {
-        val mapped = keyCodes[keyCode] ?: keyCode
-        val aapKeyCode = KeyCode.convert(mapped)
+        val aapKeyCode = KeyCode.convert(keyCode)
 
-        if (mapped == KeyEvent.KEYCODE_GUIDE) {
+        if (keyCode == KeyEvent.KEYCODE_GUIDE) {
             // Hack for navigation button to simulate touch
             val action = if (isPress)
                 Input.TouchEvent.PointerAction.TOUCH_ACTION_DOWN else Input.TouchEvent.PointerAction.TOUCH_ACTION_UP
@@ -392,7 +397,7 @@ class AapTransport(
             return
         }
 
-        if (mapped == KeyEvent.KEYCODE_N) {
+        if (keyCode == KeyEvent.KEYCODE_N) {
             val intent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE)
             intent.setPackage(context.packageName)
             context.sendBroadcast(intent)

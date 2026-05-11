@@ -132,6 +132,12 @@
     <string name="key_music">Música</string>
     <string name="key_nav">Navegação</string>
     <string name="key_night">Alternar Modo Noturno</string>
+    <string name="key_enter">Enter</string>
+    <string name="key_home">Home</string>
+    <string name="key_app_switch">Aplicativos recentes</string>
+    <string name="key_button_a">Botão A (Selecionar)</string>
+    <string name="key_button_b">Botão B (Voltar)</string>
+
 
     <!-- Language Settings -->
     <string name="app_language">Idioma do aplicativo</string>
@@ -146,6 +152,16 @@
     <string name="usb_auto_connect_description">Conecta-se automaticamente a um dispositivo USB conhecido assim que o aplicativo é aberto.</string>
     <string name="auto_start_bt_label">Início automático por Bluetooth</string>
     <string name="auto_start_bt_description">Abrir automaticamente o Headunit Revived quando um dispositivo Bluetooth específico se conectar.</string>
+    <string name="auto_start_wifi_label">Início automático por Wi-Fi</string>
+    <string name="auto_start_wifi_description">Abre o Headunit Revived automaticamente quando conectado a um SSID Wi-Fi específico.</string>
+    <string name="auto_start_wifi_ssid_label">SSID Wi-Fi</string>
+    <string name="auto_start_wifi_ssid_description">Conectar apenas se estiver associado a este SSID Wi-Fi</string>
+    <string name="auto_start_wifi_warning">Recurso legacy: Pode não funcionar de forma confiável no Android 8+ devido a restrições em segundo plano. Certifique-se de que o app esteja excluído da otimização de bateria.</string>
+    <string name="enter_wifi_ssid">Digite o SSID Wi-Fi</string>
+    <string name="wifi_ssid_not_set">Não definido</string>
+
+    <string name="listen_for_usb_devices_label">Ouvir dispositivos USB</string>
+    <string name="listen_for_usb_devices_description">Mostrar o aviso do sistema Android quando um dispositivo USB for conectado.</string>
     <string name="auto_start_usb_label">Início automático por USB</string>
     <string name="auto_start_usb_description">Abrir o app automaticamente e tentar conectar quando um dispositivo USB for conectado</string>
     <string name="auto_start_settings">Configurações de início automático</string>
@@ -209,12 +225,14 @@
     <string name="pref_stretch_screen_summary">Ignora a proporção original para preencher todo o visor (remove as barras pretas)</string>
 
     <!-- Audio Settings -->
-        <string name="forced_scale">Escala forçada (Correção legada)</string>
+        <string name="forced_scale">Escala forçada (Modo de compatibilidade)</string>
     <string name="forced_scale_description">Corrige problemas de escala em alguns dispositivos antigos que usam SurfaceView. Use apenas se a imagem parecer distorcida ou deslocada.</string>
 
 <string name="category_audio">Áudio</string>
     <string name="enable_audio_sink">Ativar receptor de áudio</string>
     <string name="enable_audio_sink_description">Se desativado, a central não atuará como receptor de áudio. O áudio tocará no celular.</string>
+    <string name="separate_audio_streams">Separar fluxos de áudio</string>
+    <string name="separate_audio_streams_description">Separar canais de áudio para música, chamadas e notificações em vez de um único fluxo multimídia (pode não funcionar corretamente em alguns dispositivos).</string>
     <string name="use_aac_audio">Usar áudio AAC</string>
     <string name="use_aac_audio_description">Usa o codec AAC para áudio para economizar banda (experimental).</string>
     <string name="audio_volume_offset">Ajustes de volume</string>
@@ -279,6 +297,7 @@
     <string name="share">Compartilhar</string>
     <string name="close">Fechar</string>
     <string name="failed_export_logs">Falha ao exportar logs</string>
+    <string name="failed_export_in_silent_logs">Não é possível exportar os registros: nível de registro Silencioso selecionado</string>
     <string name="switching_to_android_auto">Alternando para Android Auto…</string>
     <string name="switch_failed">Falha ao alternar</string>
     <string name="requesting_usb_permission">Solicitando permissão USB…</string>
@@ -287,6 +306,7 @@
     <string name="success">Sucesso</string>
     <string name="failed">Falha</string>
     <string name="failed_start_android_auto">Falha ao iniciar Android Auto</string>
+    <string name="failed_self_mode_android10">O modo Self-mode provavelmente está bloqueado pelo Google no Android 10 (AA 16.4+). Veja o README.</string>
     <string name="android_auto_starting">Android Auto está iniciando…</string>
     <string name="connection_interrupted">Conexão perdida</string>
     <string name="connection_interrupted_detail">Tentando novamente…</string>
@@ -326,12 +346,13 @@
     <string name="fullscreen_none">Normal (Barras visíveis)</string>
     <string name="fullscreen_immersive">Imersivo (Barras ocultas)</string>
     <string name="fullscreen_immersive_avoid_notch">Imersivo (Evitar Notch)</string>
-    <string name="fullscreen_immersive_avoid_notch_desc">Oculta todas las barras e adiciona preenchimento para evitar que a projezione seja coberta pelo Notch/Recorte.</string>
+    <string name="fullscreen_immersive_avoid_notch_desc">Oculta todas as barras e adiciona preenchimento para evitar que a projeção seja coberta pelo Notch/Recorte.</string>
     <string name="fullscreen_status_only">Ocultar apenas a barra de status</string>
     <string name="log_level">Nível de Log</string>
     <string name="log_level_description">Escolha o nível de detalhe da saída de log para depuração.</string>
     <string name="start_log_capture">Iniciar captura de log</string>
     <string name="start_log_capture_description">Começa a registrar os logs do sistema em um arquivo.</string>
+    <string name="start_log_capture_in_silent">Não é possível iniciar a gravação: nível de registro Silencioso selecionado</string>
     <string name="stop_log_capture">Parar captura de log</string>
     <string name="stop_log_capture_description">Interrompe a gravação e salva o arquivo de log.</string>
 
@@ -417,12 +438,12 @@
     <string name="hotspot_permission_title">Permissão necessária</string>
     <string name="hotspot_permission_message">O recurso de ponto de acesso requer a permissão \"Modificar configurações do sistema\". Por favor, ative-a na próxima tela.</string>
 
-    <string name="not_supported_nativeaa">O modo Sem Fio Nativo parece não ser suportado</string>
-    <string name="not_supported_nativeaa_desc">Seu dispositivo pode não suportar os recursos de Bluetooth ou Wi-Fi necessários para o modo Sem Fio Nativo. Você pode tentar de qualquer maneira, mas se falhar, use o modo \"Wireless Helper\" ou \"Auto (Headunit Server)\".</string>
+    <string name="not_supported_nativeaa">O modo Sem Fio Nativo pode não ser compatível</string>
+    <string name="not_supported_nativeaa_desc">Seu dispositivo pode não ser compatível com os recursos de Bluetooth ou Wi-Fi necessários para o modo Sem Fio Nativo. Você pode tentar de qualquer maneira, mas se falhar, use o modo \"Wireless Helper\" ou \"Auto (Headunit Server)\".</string>
     <string name="shortcut_selfmode_title">Modo Próprio (Self Mode)</string>
     <string name="shortcut_selfmode_desc">Iniciar Android Auto neste dispositivo</string>
     <string name="wait_for_wifi">Aguardar WiFi antes do WiFi Direct</string>
-    <string name="wait_for_wifi_description">Ao iniciar, aguarda a conexão WiFi antes de iniciar o WiFi Direct. Útil se seu headunit demora alguns segundos para conectar ao WiFi após ligar.</string>
+    <string name="wait_for_wifi_description">Ao iniciar, aguarda a conexão WiFi antes de iniciar o WiFi Direct. Útil se sua central multimídia demora alguns segundos para conectar ao WiFi após ligar.</string>
     <string name="wait_for_wifi_timeout">Tempo limite de espera WiFi</string>
     <string name="wireless_24ghz_warning">Nota: O Android Auto sem fio em dispositivos de 2,4 GHz pode causar atrasos, travamentos e desconexões. Se você tiver problemas, teste via USB para confirmar se é uma limitação da rede.</string>
     <string name="supported_nativeaa">Suporte sem fio aprimorado</string>
@@ -446,6 +467,7 @@
     </string-array>
 
     <string name="select_nearby_device">Selecionar dispositivo próximo</string>
+    <string name="nearby_device_found">Dispositivo próximo encontrado</string>
     <string name="connecting_to_nearby">Conectando a %s…</string>
 
     <string name="exit_dialog_title">Sair do Android Auto</string>
@@ -456,4 +478,12 @@
     <string name="audio_latency_multiplier">Multiplicador de latência de áudio</string>
     <string name="audio_latency_multiplier_description">Ajuste o tamanho do buffer de áudio (Menor = menos lag, Maior = menos engasgos)</string>
     <string name="audio_queue_capacity">Capacidade da fila de áudio (Backpressure)</string>
+    <string name="media_action_previous">Anterior</string>
+    <string name="media_action_play">Reproduzir</string>
+    <string name="media_action_pause">Pausar</string>
+    <string name="media_action_next">Próxima</string>
+    <string name="media_session_aa_status_placeholder">Conectado</string>
+    <string name="sync_media_session_aa_metadata">Faixa atual do AA na sessão de mídia</string>
+    <string name="sync_media_session_aa_metadata_description">Mostrar título, artista, duração e capa do álbum do telefone na sessão de mídia do sistema e na notificação de mídia</string>
+    <string name="error_usb_permission_failed">Erro do sistema: Falha ao solicitar a caixa de diálogo de permissão USB.</string>
 </resources>

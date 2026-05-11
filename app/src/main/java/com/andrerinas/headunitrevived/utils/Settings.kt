@@ -13,7 +13,16 @@ import com.andrerinas.headunitrevived.connection.UsbDeviceCompat
 
 class Settings(context: Context) {
 
-    private val prefs: SharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    private val _prefs: SharedPreferences? by lazy {
+        try {
+            context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private val prefs: SharedPreferences
+        get() = _prefs ?: throw IllegalStateException("SharedPreferences in credential encrypted storage are not available until after user is unlocked")
 
     fun isConnectingDevice(deviceCompat: UsbDeviceCompat): Boolean {
         val allowDevices = prefs.getStringSet("allow-devices", null) ?: return false
@@ -38,18 +47,18 @@ class Settings(context: Context) {
 
     var lastKnownLocation: Location
         get() {
-            val latitude = prefs.getLong("last-loc-latitude", (32.0864169).toLong())
-            val longitude = prefs.getLong("last-loc-longitude", (34.7557871).toLong())
+            val latitudeBits = prefs.getLong("last-loc-latitude", (32.0864169).toRawBits())
+            val longitudeBits = prefs.getLong("last-loc-longitude", (34.7557871).toRawBits())
 
             val location = Location("")
-            location.latitude = latitude.toDouble()
-            location.longitude = longitude.toDouble()
+            location.latitude = java.lang.Double.longBitsToDouble(latitudeBits)
+            location.longitude = java.lang.Double.longBitsToDouble(longitudeBits)
             return location
         }
         set(location) {
             prefs.edit()
-                .putLong("last-loc-latitude", location.latitude.toLong())
-                .putLong("last-loc-longitude", location.longitude.toLong())
+                .putLong("last-loc-latitude", location.latitude.toRawBits())
+                .putLong("last-loc-longitude", location.longitude.toRawBits())
                 .apply()
         }
 
@@ -83,6 +92,13 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("show-navigation-notifications", false)
         set(value) {
             prefs.edit().putBoolean("show-navigation-notifications", value).apply()
+        }
+
+    /** Mirror phone now-playing (title, artist, duration, art) in the system media session. */
+    var syncMediaSessionWithAaMetadata: Boolean
+        get() = prefs.getBoolean(KEY_SYNC_MEDIA_SESSION_AA_METADATA, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_SYNC_MEDIA_SESSION_AA_METADATA, value).apply()
         }
 
     var nightMode: NightMode
@@ -123,9 +139,13 @@ class Settings(context: Context) {
         }
 
     var exporterLogLevel: LogExporter.LogLevel
-        get() = LogExporter.LogLevel.entries.getOrElse(prefs.getInt("log-level", LogExporter.LogLevel.INFO.ordinal)) { LogExporter.LogLevel.INFO }
-        set(value) { prefs.edit().putInt("log-level", value.ordinal).apply() }
+        get() = LogExporter.LogLevel.entries.getOrElse(prefs.getInt(KEY_LOG_LEVEL, LogExporter.LogLevel.INFO.ordinal)) { LogExporter.LogLevel.INFO }
+        set(value) { prefs.edit().putInt(KEY_LOG_LEVEL, value.ordinal).apply() }
 
+    /** Whether log capture should be active across restarts. Default: false (disabled). */
+    var exporterCaptureEnabled: Boolean
+        get() = prefs.getBoolean(KEY_LOG_CAPTURE_ENABLED, false)
+        set(value) { prefs.edit().putBoolean(KEY_LOG_CAPTURE_ENABLED, value).apply() }
     val logLevel: Int get() = exporterLogLevel.logLevel
 
     var viewMode: ViewMode
@@ -139,11 +159,11 @@ class Settings(context: Context) {
 
     var screenOrientation: ScreenOrientation
         get() {
-            val value = prefs.getInt("screen-orientation", 0)
+            val value = prefs.getInt(KEY_SCREEN_ORIENTATION, 0)
             return ScreenOrientation.fromInt(value) ?: ScreenOrientation.SYSTEM
         }
         set(orientation) {
-            prefs.edit().putInt("screen-orientation", orientation.value).apply()
+            prefs.edit().putInt(KEY_SCREEN_ORIENTATION, orientation.value).apply()
         }
 
     var dpiPixelDensity: Int
@@ -180,6 +200,19 @@ class Settings(context: Context) {
     var insetBottom: Int
         get() = prefs.getInt("inset-bottom", 0)
         set(value) { prefs.edit().putInt("inset-bottom", value).apply() }
+
+    // Cached Surface Dimensions (used to avoid mismatch flicker on next start)
+    var cachedSurfaceWidth: Int
+        get() = prefs.getInt("cached-surface-width", 0)
+        set(value) { prefs.edit().putInt("cached-surface-width", value).apply() }
+
+    var cachedSurfaceHeight: Int
+        get() = prefs.getInt("cached-surface-height", 0)
+        set(value) { prefs.edit().putInt("cached-surface-height", value).apply() }
+
+    var cachedSurfaceSettingsHash: Int
+        get() = prefs.getInt("cached-surface-settings-hash", 0)
+        set(value) { prefs.edit().putInt("cached-surface-settings-hash", value).apply() }
 
     // Legacy Margins (can be removed later if unused)
     var marginLeft: Int
@@ -269,7 +302,7 @@ class Settings(context: Context) {
                 prefs.edit().putInt("wifi-connection-mode", 3).remove("native-aa-wireless").apply()
                 return 3
             }
-            return prefs.getInt("wifi-connection-mode", 1) // Default 1 (Auto)
+            return prefs.getInt("wifi-connection-mode", 2) // Default 2 (Wireless Helper)
         }
         set(value) { prefs.edit().putInt("wifi-connection-mode", value).apply() }
 
@@ -325,6 +358,10 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("enable-audio-sink", true)
         set(value) { prefs.edit().putBoolean("enable-audio-sink", value).apply() }
 
+    var separateAudioStreams: Boolean
+        get() = prefs.getBoolean("separate-audio-streams", false)
+        set(value) { prefs.edit().putBoolean("separate-audio-streams", value).apply() }
+
     var micInputSource: Int
         get() = prefs.getInt("mic-input-source", 0) // Default: DEFAULT
         set(value) { prefs.edit().putInt("mic-input-source", value).apply() }
@@ -340,6 +377,18 @@ class Settings(context: Context) {
     var useAacAudio: Boolean
         get() = prefs.getBoolean("use-aac-audio", false)
         set(value) { prefs.edit().putBoolean("use-aac-audio", value).apply() }
+
+    var micEchoCanceler: Boolean
+        get() = prefs.getBoolean("mic-echo-canceler", false)
+        set(value) { prefs.edit().putBoolean("mic-echo-canceler", value).apply() }
+
+    var micNoiseSuppressor: Boolean
+        get() = prefs.getBoolean("mic-noise-suppressor", false)
+        set(value) { prefs.edit().putBoolean("mic-noise-suppressor", value).apply() }
+
+    var micAutoGainControl: Boolean
+        get() = prefs.getBoolean("mic-auto-gain-control", false)
+        set(value) { prefs.edit().putBoolean("mic-auto-gain-control", value).apply() }
 
     var useNativeSsl: Boolean
         get() = prefs.getBoolean("use-native-ssl", false)
@@ -360,6 +409,18 @@ class Settings(context: Context) {
     var autoStartOnScreenOn: Boolean
         get() = prefs.getBoolean("auto-start-on-screen-on", false)
         set(value) { prefs.edit().putBoolean("auto-start-on-screen-on", value).apply() }
+
+    var autoStartOnWifi: Boolean
+        get() = prefs.getBoolean("auto-start-on-wifi", false)
+        set(value) { prefs.edit().putBoolean("auto-start-on-wifi", value).apply() }
+
+    var autoStartWifiSsid: String
+        get() = prefs.getString("auto-start-wifi-ssid", "")!!
+        set(value) { prefs.edit().putString("auto-start-wifi-ssid", value).apply() }
+        
+    var listenForUsbDevices: Boolean
+        get() = prefs.getBoolean("listen-for-usb-devices", true)
+        set(value) { prefs.edit().putBoolean("listen-for-usb-devices", value).apply() }
 
     var reopenOnReconnection: Boolean
         get() = prefs.getBoolean("reopen-on-reconnection", true)
@@ -485,6 +546,15 @@ class Settings(context: Context) {
     companion object {
         const val CONNECTION_TYPE_WIFI = "wifi"
         const val CONNECTION_TYPE_USB = "usb"
+        const val CONNECTION_TYPE_NEARBY = "nearby"
+
+        /** SharedPreferences key; also used by [AapService] for change listener. */
+        const val KEY_SYNC_MEDIA_SESSION_AA_METADATA = "sync-media-session-aa-metadata"
+
+        /** SharedPreferences key; also used by [AapService] for change listener. */
+        const val KEY_LOG_LEVEL = "log-level"
+        /** Persist whether log capture should be active across restarts. */
+        const val KEY_LOG_CAPTURE_ENABLED = "log-capture-enabled"
 
         const val AUTO_CONNECT_LAST_SESSION = "last-session"
         const val AUTO_CONNECT_SELF_MODE = "self-mode"
@@ -556,6 +626,8 @@ class Settings(context: Context) {
         }
 
         private const val KEY_AUTO_START_ON_USB = "auto-start-on-usb"
+        const val KEY_SCREEN_ORIENTATION = "screen-orientation"
+        private const val KEY_LISTEN_FOR_USB_DEVICES = "listen-for-usb-devices"
         private const val KEY_AUTO_START_BT_MAC = "auto-start-bt-mac"
 
         /**
@@ -582,6 +654,70 @@ class Settings(context: Context) {
                     .apply()
             }
         }
+
+        private const val KEY_AUTO_START_ON_WIFI = "auto-start-on-wifi"
+        private const val KEY_AUTO_START_WIFI_SSID = "auto-start-wifi-ssid"
+
+        fun isAutoStartOnWifiEnabled(context: Context): Boolean {
+            val prefs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val deviceContext = context.createDeviceProtectedStorageContext()
+                deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
+            } else {
+                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            }
+            return prefs.getBoolean(KEY_AUTO_START_ON_WIFI, false)
+        }
+
+        fun syncAutoStartOnWifiToDeviceStorage(context: Context, enabled: Boolean) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val deviceContext = context.createDeviceProtectedStorageContext()
+                deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(KEY_AUTO_START_ON_WIFI, enabled)
+                    .apply()
+            }
+        }
+
+        fun getAutoStartWifiSsid(context: Context): String {
+            val prefs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val deviceContext = context.createDeviceProtectedStorageContext()
+                deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
+            } else {
+                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            }
+            return prefs.getString(KEY_AUTO_START_WIFI_SSID, "") ?: ""
+        }
+
+        fun syncAutoStartWifiSsidToDeviceStorage(context: Context, ssid: String) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val deviceContext = context.createDeviceProtectedStorageContext()
+                deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_AUTO_START_WIFI_SSID, ssid)
+                    .apply()
+            }
+        }
+        
+        fun isListenForUsbDevicesEnabled(context: Context): Boolean {
+            val prefs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val deviceContext = context.createDeviceProtectedStorageContext()
+                deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
+            } else {
+                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            }
+            return prefs.getBoolean(KEY_LISTEN_FOR_USB_DEVICES, true) // Default is TRUE
+        }
+
+        fun syncListenForUsbDevicesToDeviceStorage(context: Context, enabled: Boolean) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val deviceContext = context.createDeviceProtectedStorageContext()
+                deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(KEY_LISTEN_FOR_USB_DEVICES, enabled)
+                    .apply()
+            }
+        }
+
 
         fun setUsbAttachedActivityEnabled(context: Context, enabled: Boolean) {
             val component = ComponentName(context, UsbAttachedActivity::class.java)
@@ -738,7 +874,11 @@ class Settings(context: Context) {
 
     // 0 = Common Wifi (NSD), 1 = Wifi Direct P2P, 2 = Nearby Devices, 3 = Phone Hotspot (Host), 4 = Headunit Hotspot (Passive)
     var helperConnectionStrategy: Int
-        get() = prefs.getInt("helper-connection-strategy", 0)
+        get() = prefs.getInt("helper-connection-strategy", 2) // Default to Nearby Devices (2)
         set(value) = prefs.edit().putInt("helper-connection-strategy", value).apply()
+
+    var lastNearbyDeviceName: String
+        get() = prefs.getString("last-nearby-device-name", "")!!
+        set(value) = prefs.edit().putString("last-nearby-device-name", value).apply()
 
 }

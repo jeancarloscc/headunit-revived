@@ -1,6 +1,8 @@
 package com.andrerinas.headunitrevived.main
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -22,16 +24,21 @@ import androidx.lifecycle.lifecycleScope
 import com.andrerinas.headunitrevived.utils.AppLog
 import android.content.res.Configuration
 import com.andrerinas.headunitrevived.utils.Settings
+import android.os.SystemClock
 import com.andrerinas.headunitrevived.utils.SetupWizard
 import com.andrerinas.headunitrevived.utils.SystemUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
 
     private var lastBackPressTime: Long = 0
     var keyListener: KeyListener? = null
+    
+    private var isOrientationReceiverRegistered = false
+    private var isFinishReceiverRegistered = false
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -48,20 +55,33 @@ class MainActivity : BaseActivity() {
         fun onKeyEvent(event: KeyEvent?): Boolean
     }
 
+    private val orientationReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == AapService.ACTION_ORIENTATION_CHANGED) {
+                AppLog.i("MainActivity: Orientation change broadcast received. Updating.")
+                requestedOrientation = Settings(this@MainActivity).screenOrientation.androidOrientation
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         logLaunchSource()
 
         // If an Android Auto session is active, bring the projection activity to front
-        if (App.provide(this).commManager.isConnected) {
+        if (App.provide(this).commManager.isConnected && !App.isPiPActive) {
             AppLog.i("MainActivity: Active session detected in onCreate, bringing projection to front")
             val aapIntent = AapProjectionActivity.intent(this).apply {
                 putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             }
             startActivity(aapIntent)
-            // DO NOT finish() here, just let it stay in background
+            
+            // If we are auto-forwarding, hide the splash immediately to avoid flashing it twice
+            if (savedInstanceState == null) {
+                findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+            }
         }
 
         setTheme(R.style.AppTheme)
@@ -79,11 +99,11 @@ class MainActivity : BaseActivity() {
         val appSettings = Settings(this)
         requestedOrientation = appSettings.screenOrientation.androidOrientation
 
-        // Sync UsbAttachedActivity component state with the auto-start USB setting.
+        // Sync UsbAttachedActivity component state with the listen for USB devices setting.
         // This covers first install, app updates (manifest may reset component state),
-        // and ensures the USB modal only appears when the user has opted in.
+        // and ensures the USB system modal only appears when the user has opted in to listen for ALL USB devices.
         lifecycleScope.launch(Dispatchers.IO) {
-            Settings.setUsbAttachedActivityEnabled(applicationContext, appSettings.autoStartOnUsb)
+            Settings.setUsbAttachedActivityEnabled(applicationContext, appSettings.listenForUsbDevices)
         }
 
         // Start main service immediately to handle connections and wireless server
@@ -108,10 +128,43 @@ class MainActivity : BaseActivity() {
             }
         })
 
+        if (savedInstanceState == null) {
+            val elapsedSinceStart = SystemClock.elapsedRealtime() - App.appStartTime
+            val targetTotalDuration = 1200L
+            val actualDelay = (targetTotalDuration - elapsedSinceStart).coerceAtLeast(0L)
+            
+            showSplashWithDelay(actualDelay)
+        } else {
+            findViewById<View>(R.id.splash_overlay)?.visibility = View.GONE
+        }
+
         requestPermissions()
         viewModel.register()
-        handleIntent(intent)
+        handleLaunchIntent(intent)
         setupWifiDirectInfo()
+
+        ContextCompat.registerReceiver(
+            this, finishReceiver,
+            android.content.IntentFilter("com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES"),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        isFinishReceiverRegistered = true
+    }
+
+    private fun showSplashWithDelay(delayMs: Long) {
+        val overlay = findViewById<View>(R.id.splash_overlay) ?: return
+        lifecycleScope.launch(Dispatchers.Main) {
+            if (delayMs > 0) {
+                delay(delayMs)
+            }
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction {
+                    overlay.visibility = View.GONE
+                }
+                .start()
+        }
     }
 
     private fun setupWifiDirectInfo() {
@@ -133,21 +186,15 @@ class MainActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        ContextCompat.registerReceiver(
-            this, finishReceiver,
-            android.content.IntentFilter("com.andrerinas.headunitrevived.ACTION_FINISH_ACTIVITIES"),
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
     }
 
     override fun onStop() {
         super.onStop()
-        try { unregisterReceiver(finishReceiver) } catch (e: Exception) {}
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleIntent(intent)
+        handleLaunchIntent(intent)
     }
 
     private fun logLaunchSource() {
@@ -173,15 +220,37 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleIntent(intent: Intent?) {
+    private fun handleLaunchIntent(intent: Intent?) {
         if (intent == null) return
 
-        AppLog.i("MainActivity received intent: ${intent.action}, data: ${intent.data}")
+        AppLog.i("MainActivity: Processing launch intent: ${intent.action}, data: ${intent.data}")
+
+        val intentData = intent.data
+        val intentAction = intent.action
+
+        if (intentAction == "com.andrerinas.headunitrevived.ACTION_EXIT") {
+            AppLog.i("MainActivity: Received exit action")
+            val exitIntent = Intent(this, AapService::class.java).apply {
+                this.action = AapService.ACTION_STOP_SERVICE
+            }
+            ContextCompat.startForegroundService(this, exitIntent)
+            finishAffinity()
+            return
+        }
+
+        if (intentAction == AapService.ACTION_START_SELF_MODE || 
+           (intentData?.scheme == "headunit" && intentData.host == "selfmode")) {
+            AppLog.i("MainActivity: Forced self-mode start requested")
+            HomeFragment.forceSelfModeLaunch = true
+            val selfModeIntent = Intent(this, AapService::class.java).apply {
+                this.action = AapService.ACTION_START_SELF_MODE
+            }
+            ContextCompat.startForegroundService(this, selfModeIntent)
+        }
 
         if (intent.action == Intent.ACTION_VIEW) {
-            val data = intent.data
-            if (data?.scheme == "headunit" && data.host == "connect") {
-                val ip = data.getQueryParameter("ip")
+            if (intentData?.scheme == "headunit" && intentData.host == "connect") {
+                val ip = intentData.getQueryParameter("ip")
                 if (!ip.isNullOrEmpty()) {
                     AppLog.i("Received connect intent for IP: $ip")
                     ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
@@ -195,32 +264,20 @@ class MainActivity : BaseActivity() {
                     }
                     ContextCompat.startForegroundService(this, autoIntent)
                 }
-            } else if (data?.scheme == "headunit" && data.host == "disconnect") {
+            } else if (intentData?.scheme == "headunit" && intentData.host == "disconnect") {
                 AppLog.i("Received disconnect intent")
                 val stopIntent = Intent(this, AapService::class.java).apply {
                     action = AapService.ACTION_DISCONNECT
                 }
                 ContextCompat.startForegroundService(this, stopIntent)
-            } else if (data?.scheme == "headunit" && data.host == "selfmode") {
-                AppLog.i("Received start-in-selfmode intent")
-                val selfModeIntent = Intent(this, AapService::class.java).apply {
-                    action = AapService.ACTION_START_SELF_MODE
-                }
-                ContextCompat.startForegroundService(this, selfModeIntent)
-            } else if (data?.scheme == "headunit" && data.host == "exit") {
-                AppLog.i("Received full exit intent")
+            } else if (intentData?.scheme == "headunit" && intentData.host == "exit") {
+                AppLog.i("Received full exit intent via deep link")
                 val exitIntent = Intent(this, AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
                 ContextCompat.startForegroundService(this, exitIntent)
-                finishAffinity() // Close all activities in this task
-            } else if (data?.scheme == "geo" || data?.scheme == "google.navigation" || data?.host == "maps.google.com") {
-                AppLog.i("Received navigation intent: $data")
-                // In the future, we could parse coordinates and send to AA via a custom message
-                // For now, we just ensure the app is opened (which it is by reaching this point)
+                finishAffinity()
             }
-        } else if (intent.action == "android.intent.action.NAVIGATE") {
-            AppLog.i("Received generic NAVIGATE intent")
         }
     }
 
@@ -271,14 +328,26 @@ class MainActivity : BaseActivity() {
 
         checkSetupFlow()
 
+        requestedOrientation = Settings(this).screenOrientation.androidOrientation
+        ContextCompat.registerReceiver(this, orientationReceiver, android.content.IntentFilter(AapService.ACTION_ORIENTATION_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
+        isOrientationReceiverRegistered = true
+
         // If an Android Auto session is active, bring the projection activity to front
-        if (App.provide(this).commManager.isConnected) {
+        if (App.provide(this).commManager.isConnected && !App.isPiPActive && !AapProjectionActivity.isForeground) {
             AppLog.i("MainActivity: Active session detected, bringing projection to front")
             val aapIntent = AapProjectionActivity.intent(this).apply {
                 putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             }
             startActivity(aapIntent)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (isOrientationReceiverRegistered) {
+            unregisterReceiver(orientationReceiver)
+            isOrientationReceiverRegistered = false
         }
     }
 
@@ -316,6 +385,10 @@ class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (isFinishReceiverRegistered) {
+            unregisterReceiver(finishReceiver)
+            isFinishReceiverRegistered = false
+        }
         if (isFinishing) {
             AppLog.i("MainActivity finishing, resetting auto-start flag.")
             HomeFragment.resetAutoStart()

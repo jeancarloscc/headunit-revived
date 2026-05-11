@@ -132,6 +132,12 @@
     <string name="key_music">Música</string>
     <string name="key_nav">Navegación</string>
     <string name="key_night">Alternar modo noche</string>
+    <string name="key_enter">Intro</string>
+    <string name="key_home">Inicio</string>
+    <string name="key_app_switch">Aplicaciones recientes</string>
+    <string name="key_button_a">Botón A (Seleccionar)</string>
+    <string name="key_button_b">Botón B (Atrás)</string>
+
 
     <!-- Language Settings -->
     <string name="app_language">Idioma de la aplicación</string>
@@ -146,6 +152,16 @@
     <string name="usb_auto_connect_description">Se conecta automáticamente a un dispositivo USB conocido tan pronto como se abre la aplicación.</string>
     <string name="auto_start_bt_label">Autoinicio por Bluetooth</string>
     <string name="auto_start_bt_description">Abrir Headunit Revived automáticamente al conectar un dispositivo Bluetooth.</string>
+    <string name="auto_start_wifi_label">Inicio automático por WiFi</string>
+    <string name="auto_start_wifi_description">Abrir Headunit Revived automáticamente al conectarse a una red WiFi específica.</string>
+    <string name="auto_start_wifi_ssid_label">SSID WiFi</string>
+    <string name="auto_start_wifi_ssid_description">Conectar solo cuando se detecte este SSID WiFi</string>
+    <string name="auto_start_wifi_warning">Característica heredada: Es posible que esto no funcione correctamente en Android 8+ debido a restricciones de fondo. Asegúrese de excluir la aplicación de la optimización de batería.</string>
+    <string name="enter_wifi_ssid">Introducir SSID WiFi</string>
+    <string name="wifi_ssid_not_set">No establecido</string>
+
+    <string name="listen_for_usb_devices_label">Escuchar dispositivos USB</string>
+    <string name="listen_for_usb_devices_description">Mostrar el aviso del sistema Android al conectar un dispositivo USB.</string>
     <string name="auto_start_usb_label">Inicio automático por USB</string>
     <string name="auto_start_usb_description">Abrir la app automáticamente e intentar la conexión cuando se conecte un dispositivo USB</string>
     <string name="auto_start_settings">Ajustes de inicio automático</string>
@@ -215,6 +231,8 @@
 <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Salida de audio</string>
     <string name="enable_audio_sink_description">Si se desactiva, el audio sonará en el móvil.</string>
+    <string name="separate_audio_streams">Separar flujos de audio</string>
+    <string name="separate_audio_streams_description">Separar los canales de audio para música, llamadas y notificaciones en lugar de un único flujo multimedia (puede no funcionar correctamente en algunos dispositivos).</string>
     <string name="use_aac_audio">Usar audio AAC</string>
     <string name="use_aac_audio_description">Usar códec AAC para ahorrar ancho de banda.</string>
     <string name="audio_volume_offset">Ajuste de volumen</string>
@@ -279,6 +297,7 @@
     <string name="share">Compartir</string>
     <string name="close">Cerrar</string>
     <string name="failed_export_logs">Error al exportar logs</string>
+    <string name="failed_export_in_silent_logs">No se pueden exportar los registros: nivel de registro silencioso seleccionado</string>
     <string name="switching_to_android_auto">Cambiando a Android Auto…</string>
     <string name="switch_failed">Fallo al cambiar</string>
     <string name="requesting_usb_permission">Pidiendo permiso USB…</string>
@@ -287,6 +306,7 @@
     <string name="success">Éxito</string>
     <string name="failed">Fallo</string>
     <string name="failed_start_android_auto">Error al iniciar Android Auto</string>
+    <string name="failed_self_mode_android10">Es probable que Google bloquee el modo propio en Android 10 (AA 16.4+). Consulte el README.</string>
     <string name="android_auto_starting">Iniciando Android Auto…</string>
     <string name="connection_interrupted">Conexión perdida</string>
     <string name="connection_interrupted_detail">Reintentando…</string>
@@ -334,6 +354,7 @@
     <string name="log_level_description">Elija el nivel de detalle de los mensajes de log para depuración.</string>
     <string name="start_log_capture">Iniciar captura de log</string>
     <string name="start_log_capture_description">Comienza a registrar los logs del sistema en un archivo.</string>
+    <string name="start_log_capture_in_silent">No se puede iniciar la grabación: nivel de registro silencioso seleccionado</string>
     <string name="stop_log_capture">Detener captura de log</string>
     <string name="stop_log_capture_description">Detiene la grabación y guarda el archivo de log.</string>
 
@@ -445,6 +466,7 @@
     </string-array>
 
     <string name="select_nearby_device">Seleccionar dispositivo cercano</string>
+    <string name="nearby_device_found">Dispositivo cercano encontrado</string>
     <string name="connecting_to_nearby">Conectando a %s…</string>
 
     <string name="exit_dialog_title">Salir de Android Auto</string>
@@ -455,4 +477,12 @@
     <string name="audio_latency_multiplier">Multiplicador de latencia de audio</string>
     <string name="audio_latency_multiplier_description">Ajusta el tamaño del búfer de audio (Menor = menos lag, Mayor = menos entrecortado)</string>
     <string name="audio_queue_capacity">Capacidad de la cola de audio (Backpressure)</string>
+    <string name="media_action_previous">Anterior</string>
+    <string name="media_action_play">Reproducir</string>
+    <string name="media_action_pause">Pausa</string>
+    <string name="media_action_next">Siguiente</string>
+    <string name="media_session_aa_status_placeholder">Conectado</string>
+    <string name="sync_media_session_aa_metadata">Pista actual de AA en la sesión multimedia</string>
+    <string name="sync_media_session_aa_metadata_description">Mostrar título, artista, duración y carátula del teléfono en la sesión multimedia del sistema y en la notificación multimedia</string>
+    <string name="error_usb_permission_failed">Error del sistema: Fallo al solicitar el cuadro de diálogo de permiso USB.</string>
 </resources>

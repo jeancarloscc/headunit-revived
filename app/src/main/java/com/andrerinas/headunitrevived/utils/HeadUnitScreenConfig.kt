@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import com.andrerinas.headunitrevived.aap.protocol.proto.Control
+import com.andrerinas.headunitrevived.decoder.VideoDecoder
 import kotlin.math.roundToInt
 
 object HeadUnitScreenConfig {
@@ -15,7 +16,8 @@ object HeadUnitScreenConfig {
     private var scaleFactor: Float = 1.0f
     private var isSmallScreen: Boolean = true
     private var isPortraitScaled: Boolean = false
-    private var isInitialized: Boolean = false // New flag
+    private var isInitialized: Boolean = false
+    private var lastSettingsHash: Int = 0
     
     // Flag to determine if the projection should stretch and ignore aspect ratio
     private var stretchToFill: Boolean = false 
@@ -24,7 +26,10 @@ object HeadUnitScreenConfig {
     var forcedScale: Boolean = false
         private set
 
-    var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType? = null
+    var negotiatedResolutionType: Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType = Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
+    var isResolutionLocked: Boolean = false
+        private set
+
     private lateinit var currentSettings: Settings // Store settings instance
 
     // System Insets (Bars/Cutouts)
@@ -43,19 +48,23 @@ object HeadUnitScreenConfig {
 
 
     fun init(context: Context, displayMetrics: DisplayMetrics, settings: Settings) {
-        // Read user preference for stretching the screen from the app's Settings
         stretchToFill = settings.stretchToFill
-        // Only allow forcedScale if viewMode is SURFACE (0)
         forcedScale = settings.forcedScale && settings.viewMode == Settings.ViewMode.SURFACE
 
-        val screenWidth: Int
-        val screenHeight: Int
+        val realW: Int
+        val realH: Int
+        val usableW: Int
+        val usableH: Int
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30+
             val windowManager = context.getSystemService(android.view.WindowManager::class.java)
             val bounds = windowManager.currentWindowMetrics.bounds
-            screenWidth = bounds.width()
-            screenHeight = bounds.height()
+            // On API 30+, bounds on an Activity context often return the usable area.
+            // We use the displayMetrics as a fallback for the physical area.
+            realW = displayMetrics.widthPixels
+            realH = displayMetrics.heightPixels
+            usableW = bounds.width()
+            usableH = bounds.height()
         } else { // Older APIs
             @Suppress("DEPRECATION")
             val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
@@ -63,22 +72,72 @@ object HeadUnitScreenConfig {
             val size = android.graphics.Point()
             @Suppress("DEPRECATION")
             display.getRealSize(size)
-            screenWidth = size.x
-            screenHeight = size.y
+            realW = size.x
+            realH = size.y
+            
+            @Suppress("DEPRECATION")
+            display.getSize(size)
+            usableW = size.x
+            usableH = size.y
         }
 
-        // Only update if dimensions or settings changed (and we are already initialized)
-        if (isInitialized && realScreenWidthPx == screenWidth && realScreenHeightPx == screenHeight && this::currentSettings.isInitialized && currentSettings == settings) {
+        // Only update if dimensions or settings changed
+        val currentHash = computeSettingsHash(settings)
+        if (isInitialized && realScreenWidthPx == realW && realScreenHeightPx == realH && lastSettingsHash == currentHash) {
             return
         }
 
+        // If settings changed (e.g. orientation swap), unlock resolution before recalculating
+        if (isInitialized && lastSettingsHash != 0 && lastSettingsHash != currentHash) {
+            AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Settings changed ($lastSettingsHash -> $currentHash). Unlocking resolution.")
+            unlockResolution()
+        }
+
         isInitialized = true
+        lastSettingsHash = currentHash
         currentSettings = settings
 
-        realScreenWidthPx = screenWidth
-        realScreenHeightPx = screenHeight
+        // Determine if we are planning to hide the bars (Immersive)
+        val immersive = settings.fullscreenMode == Settings.FullscreenMode.IMMERSIVE || 
+                        settings.fullscreenMode == Settings.FullscreenMode.IMMERSIVE_WITH_NOTCH
+
+        // THE ANCHOR: 
+        // If we are immersive, our "World" is the physical screen. 
+        // If we are NOT, our "World" is limited to the usable window area (no lying to AA).
+        val defaultAnchorW = if (immersive) realW else usableW
+        val defaultAnchorH = if (immersive) realH else usableH
+        
         density = displayMetrics.density
         densityDpi = displayMetrics.densityDpi
+
+        // Initial Insets: For non-immersive, the bars are already baked into the anchor (realSize = 736),
+        // so we start with 0 system insets and just add manual settings.
+        systemInsetLeft = settings.insetLeft
+        systemInsetTop = settings.insetTop
+        systemInsetRight = settings.insetRight
+        systemInsetBottom = settings.insetBottom
+        
+        // Check if we have cached surface dimensions from a previous session.
+        // If the settings haven't changed (same hash), use the cached values
+        // to avoid a mid-session UpdateUiConfigRequest and potential flicker.
+        val cachedW = settings.cachedSurfaceWidth
+        val cachedH = settings.cachedSurfaceHeight
+        val cachedHash = settings.cachedSurfaceSettingsHash
+
+        if (cachedW > 0 && cachedH > 0 && cachedHash == currentHash) {
+            // Cached surface dimensions are the usable area. The anchor includes insets.
+            realScreenWidthPx = cachedW + systemInsetLeft + systemInsetRight
+            realScreenHeightPx = cachedH + systemInsetTop + systemInsetBottom
+            AppLog.i("[UI_DEBUG_FIX] HeadUnitScreenConfig: Using cached surface dimensions: ${cachedW}x${cachedH} (anchor: ${realScreenWidthPx}x${realScreenHeightPx})")
+        } else {
+            realScreenWidthPx = defaultAnchorW
+            realScreenHeightPx = defaultAnchorH
+            if (cachedW > 0) {
+                AppLog.i("[UI_DEBUG_FIX] HeadUnitScreenConfig: Cache invalidated (hash mismatch: stored=$cachedHash, current=$currentHash)")
+            }
+        }
+
+        AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Honest Init | Mode: ${settings.fullscreenMode} | Anchor: ${realScreenWidthPx}x${realScreenHeightPx} | Seeded Insets: L$systemInsetLeft T$systemInsetTop R$systemInsetRight B$systemInsetBottom")
         
         recalculate()
     }
@@ -112,7 +171,19 @@ object HeadUnitScreenConfig {
         val isPortraitDisplay = screenHeightPx > screenWidthPx
 
         // 1. Determine base negotiated resolution
-        if (selectedResolution == Settings.Resolution.AUTO) {
+        if (isResolutionLocked) {
+            // Safety Check: If the locked resolution's orientation (Landscape/Portrait) 
+            // no longer matches the display orientation, the lock is stale and must be dropped.
+            val isPortraitRes = getNegotiatedHeight() > getNegotiatedWidth()
+            if (isPortraitRes != isPortraitDisplay) {
+                AppLog.i("[UI_DEBUG] CarScreen: Orientation mismatch detected (Res: ${if(isPortraitRes) "P" else "L"}, Display: ${if(isPortraitDisplay) "P" else "L"}). DROPPING LOCK.")
+                unlockResolution()
+            } else {
+                AppLog.i("[UI_DEBUG] CarScreen: RESOLUTION LOCKED to $negotiatedResolutionType. Usable area is ${screenWidthPx}x${screenHeightPx}. Skipping re-negotiation.")
+            }
+        }
+        
+        if (!isResolutionLocked && selectedResolution == Settings.Resolution.AUTO) {
             if (isPortraitDisplay) {
                 negotiatedResolutionType = if (screenWidthPx > 720 || screenHeightPx > 1280) {
                     Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1080x1920
@@ -122,9 +193,9 @@ object HeadUnitScreenConfig {
             } else {
                 negotiatedResolutionType = when {
                     screenWidthPx <= 800 && screenHeightPx <= 480 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._800x480
-                    (screenWidthPx >= 3840 || screenHeightPx >= 2160) && com.andrerinas.headunitrevived.decoder.VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 -> 
+                    (screenWidthPx >= 3840 || screenHeightPx >= 2160) && VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 -> 
                         Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._3840x2160
-                    (screenWidthPx >= 2560 || screenHeightPx >= 1440) && com.andrerinas.headunitrevived.decoder.VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 -> 
+                    (screenWidthPx >= 2560 || screenHeightPx >= 1440) && VideoDecoder.isHevcSupported() && Build.VERSION.SDK_INT >= 24 -> 
                         Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._2560x1440
                     screenWidthPx > 1280 || screenHeightPx > 720 -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1920x1080
                     else -> Control.Service.MediaSinkService.VideoConfiguration.VideoCodecResolutionType._1280x720
@@ -148,7 +219,7 @@ object HeadUnitScreenConfig {
         }
 
         // 2. Perform scaling calculations (now safe because negotiatedResolutionType is set)
-        AppLog.i("CarScreen: usable area ${screenWidthPx}x${screenHeightPx}, using $negotiatedResolutionType")
+        AppLog.i("[UI_DEBUG] CarScreen: usable area ${screenWidthPx}x${screenHeightPx}, using $negotiatedResolutionType")
 
         if (screenHeightPx > screenWidthPx) {
             isSmallScreen = screenWidthPx <= 1080 && screenHeightPx <= 1920
@@ -171,7 +242,7 @@ object HeadUnitScreenConfig {
             }
         }
         
-        AppLog.i("CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, scales: scaleX: ${getScaleX()}, scaleY: ${getScaleY()}")
+        AppLog.i("[UI_DEBUG] CarScreen isSmallScreen: $isSmallScreen, scaleFactor: $scaleFactor, margins: w=${getWidthMargin()}, h=${getHeightMargin()}")
     }
 
     fun getAdjustedHeight(): Int {
@@ -188,12 +259,20 @@ object HeadUnitScreenConfig {
 
     fun getNegotiatedHeight(): Int {
         val resString = negotiatedResolutionType.toString().replace("_", "")
-        return resString.split("x")[1].toInt()
+        return try {
+            resString.split("x")[1].toInt()
+        } catch (e: Exception) {
+            480
+        }
     }
 
     fun getNegotiatedWidth(): Int {
         val resString = negotiatedResolutionType.toString().replace("_", "")
-        return resString.split("x")[0].toInt()
+        return try {
+            resString.split("x")[0].toInt()
+        } catch (e: Exception) {
+            800
+        }
     }
 
     fun getHeightMargin(): Int {
@@ -254,15 +333,83 @@ object HeadUnitScreenConfig {
         }
     }
 
-    fun getHorizontalCorrection(): Float {
-        return (getNegotiatedWidth() - getWidthMargin()).toFloat() / screenWidthPx.toFloat()
-    }
-
-    fun getVerticalCorrection(): Float {
-        val fIntValue = (getNegotiatedHeight() - getHeightMargin()).toFloat() / screenHeightPx.toFloat()
-        return fIntValue
-    }
-
     fun getUsableWidth(): Int = screenWidthPx
     fun getUsableHeight(): Int = screenHeightPx
+
+    // These are half the total margin, distributed symmetrically.
+    fun getLeftMargin(): Int = getWidthMargin() / 2
+    fun getRightMargin(): Int = getWidthMargin() - getLeftMargin()
+    fun getTopMargin(): Int = getHeightMargin() / 2
+    fun getBottomMargin(): Int = getHeightMargin() - getTopMargin()
+
+    /**
+     * Called when the actual rendering surface dimensions become known (from onSurfaceChanged).
+     * Compares with the current usable area and updates the anchor if they differ.
+     * @return true if the dimensions changed and margins need to be re-sent to AA.
+     */
+    fun updateSurfaceDimensions(surfaceW: Int, surfaceH: Int): Boolean {
+        val diffW = kotlin.math.abs(surfaceW - screenWidthPx)
+        val diffH = kotlin.math.abs(surfaceH - screenHeightPx)
+
+        if (diffW <= SURFACE_MISMATCH_TOLERANCE && diffH <= SURFACE_MISMATCH_TOLERANCE) {
+            return false
+        }
+
+        if( (diffW > 0 && getNegotiatedWidth() == surfaceW) || (diffH > 0 && getNegotiatedHeight() == surfaceH)) {
+            AppLog.i("[UI_DEBUG_FIX] Surface mismatch detected but matches negotiated resolution. Usable: ${screenWidthPx}x${screenHeightPx}, Actual surface: ${surfaceW}x${surfaceH}. Ignoring.")
+            return false
+        }
+
+        AppLog.i("[UI_DEBUG_FIX] Surface mismatch detected! Usable: ${screenWidthPx}x${screenHeightPx}, Actual surface: ${surfaceW}x${surfaceH} (diff: ${diffW}x${diffH})")
+
+        // Update anchor: the surface dimensions ARE the real usable area,
+        // so the anchor is the usable area plus insets.
+        realScreenWidthPx = surfaceW + systemInsetLeft + systemInsetRight
+        realScreenHeightPx = surfaceH + systemInsetTop + systemInsetBottom
+
+        recalculate()
+
+        AppLog.i("[UI_DEBUG_FIX] Recalculated: usable=${screenWidthPx}x${screenHeightPx}, margins: w=${getWidthMargin()}, h=${getHeightMargin()}, per-side: L=${getLeftMargin()} T=${getTopMargin()} R=${getRightMargin()} B=${getBottomMargin()}")
+        return true
+    }
+
+    /**
+     * Computes a hash of all settings that affect screen dimensions.
+     * Used to invalidate the cached surface dimensions when settings change.
+     */
+    fun computeSettingsHash(settings: Settings): Int {
+        var hash = 17
+        hash = 31 * hash + settings.resolutionId
+        hash = 31 * hash + settings.dpiPixelDensity
+        hash = 31 * hash + settings.insetLeft
+        hash = 31 * hash + settings.insetTop
+        hash = 31 * hash + settings.insetRight
+        hash = 31 * hash + settings.insetBottom
+        hash = 31 * hash + settings.viewMode.ordinal
+        hash = 31 * hash + settings.screenOrientation.ordinal
+        hash = 31 * hash + settings.fullscreenMode.value
+        hash = 31 * hash + (if (settings.stretchToFill) 1 else 0)
+        hash = 31 * hash + (if (settings.forcedScale) 1 else 0)
+        // Include physical dimensions in the hash. If the screen rotates or a foldable is unfolded,
+        // the hash will change, triggering a clean unlock and recalculation.
+        hash = 31 * hash + realScreenWidthPx
+        hash = 31 * hash + realScreenHeightPx
+        return hash
+    }
+
+    fun lockResolution() {
+        if (!isResolutionLocked) {
+            AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Locking resolution at $negotiatedResolutionType")
+            isResolutionLocked = true
+        }
+    }
+
+    fun unlockResolution() {
+        if (isResolutionLocked) {
+            AppLog.i("[UI_DEBUG] HeadUnitScreenConfig: Unlocking resolution (was $negotiatedResolutionType)")
+            isResolutionLocked = false
+        }
+    }
+
+    private const val SURFACE_MISMATCH_TOLERANCE = 4
 }

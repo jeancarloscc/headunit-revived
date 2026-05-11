@@ -9,13 +9,15 @@ import com.andrerinas.headunitrevived.decoder.AudioDecoder
 object AudioConfigs {
     private val audioTracks = SparseArray<Media.AudioConfiguration>(3)
 
-    fun stream(channel: Int) : Int
+    fun stream(channel: Int, separateAudioStreams: Boolean = true) : Int
     {
-//        when(channel) {
-//            Channel.ID_AUD -> return AudioManager.STREAM_MUSIC
-//            Channel.ID_AU1 -> return AudioManager.STREAM_SYSTEM
-//            Channel.ID_AU2 -> return AudioManager.STREAM_VOICE_CALL
-//        }
+        if (separateAudioStreams) {
+            return when(channel) {
+                Channel.ID_AU1 -> AudioManager.STREAM_VOICE_CALL
+                Channel.ID_AU2 -> AudioManager.STREAM_NOTIFICATION
+                else -> AudioManager.STREAM_MUSIC
+            }
+        }
         return AudioManager.STREAM_MUSIC
     }
 
