@@ -27,6 +27,9 @@ class AapNavigation(
     private var lastNavState: NavigationStatus.NavigationState? = null
     private var lastCurrentPosition: NavigationStatus.NavigationCurrentPosition? = null
 
+    private var lastKnownDistance: Int? = null
+    private var lastKnownTime: Int? = null
+
     fun process(message: AapMessage): Boolean {
         if (message.channel != Channel.ID_NAV) return false
 
@@ -37,11 +40,11 @@ class AapNavigation(
                     lastTurnDetail = detail
                     currentStreet = detail.road.takeIf { it.isNotBlank() } ?: ""
                     AppLog.d("Nav: NextTurnDetail road=${detail.road} nextturn=${detail.nextturn}")
-                    sendNavigationBroadcast(distanceMeters = null, timeSeconds = null, detail = detail)
+                    sendNavigationBroadcast(distanceMeters = lastKnownDistance, timeSeconds = lastKnownTime, detail = detail)
                     if (settings.showNavigationNotifications) {
                         val actionText = nextEventToAction(detail.nextturn)
                         val street = currentStreet.ifBlank { detail.road.takeIf { r -> r.isNotBlank() } ?: "" }.ifBlank { "—" }
-                        showNotification(distanceMeters = null, action = actionText, street = street)
+                        showNotification(distanceMeters = lastKnownDistance, action = actionText, street = street)
                     }
                     true
                 } catch (e: Exception) {
@@ -54,13 +57,19 @@ class AapNavigation(
                     val event = message.parse(NavigationStatus.NextTurnDistanceEvent.newBuilder()).build()
                     val distanceMeters = if (event.hasDistance()) event.distance else null
                     val timeSeconds = if (event.hasTime()) event.time else null
+                    
+                    if (distanceMeters != null) lastKnownDistance = distanceMeters
+                    if (timeSeconds != null) lastKnownTime = timeSeconds
+                    
+                    AppLog.i("Nav: NextTurnDistanceEvent distance=$distanceMeters (uint32) time=$timeSeconds")
+                    
                     val detail = lastTurnDetail
                     val actionText = detail?.let { nextEventToAction(it.nextturn) } ?: context.getString(R.string.nav_action_unknown)
                     val street = currentStreet.ifBlank { detail?.road?.takeIf { r -> r.isNotBlank() } ?: "" }.ifBlank { "—" }
-                    sendNavigationBroadcast(distanceMeters = distanceMeters, timeSeconds = timeSeconds, detail = detail)
+                    sendNavigationBroadcast(distanceMeters = lastKnownDistance, timeSeconds = lastKnownTime, detail = detail)
                     if (settings.showNavigationNotifications) {
                         showNotification(
-                            distanceMeters = distanceMeters,
+                            distanceMeters = lastKnownDistance,
                             action = actionText,
                             street = street
                         )
@@ -75,6 +84,13 @@ class AapNavigation(
                 try {
                     val state = message.parse(NavigationStatus.NavigationState.newBuilder()).build()
                     lastNavState = state
+                    
+                    if (state.stepsList.isEmpty() && state.destinationsList.isEmpty()) {
+                        AppLog.i("Nav: Navigation stopped, clearing cache")
+                        lastKnownDistance = null
+                        lastKnownTime = null
+                    }
+
                     val firstStep = state.stepsList.firstOrNull()
                     if (firstStep != null) {
                         currentStreet = firstStep.road?.name ?: ""
@@ -117,10 +133,22 @@ class AapNavigation(
         val firstStep = state.stepsList.firstOrNull() ?: return
         val maneuver = firstStep.maneuver
         
-        val distanceMeters = if (pos?.hasStepDistance() == true) pos.stepDistance.distanceM.toInt() else null
+        // Try step distance first, then fall back to destination distance if available
+        val rawDist = if (pos?.hasStepDistance() == true) {
+            pos.stepDistance.distanceM 
+        } else {
+            pos?.destinationDistancesList?.firstOrNull()?.takeIf { it.hasDistanceM() }?.distanceM
+        }
+        
+        val distanceMeters = rawDist?.let { Math.round(it).toInt() }
         val timeSeconds = pos?.destinationDistancesList?.firstOrNull()?.let {
             if (it.hasTimeToArrivalS()) it.timeToArrivalS else null
         }
+        
+        if (distanceMeters != null) lastKnownDistance = distanceMeters
+        if (timeSeconds != null) lastKnownTime = timeSeconds
+        
+        AppLog.i("Nav: ProtocolUpdate distanceMeters=$distanceMeters (raw=$rawDist) timeSeconds=$timeSeconds (hasStepDist=${pos?.hasStepDistance()})")
         
         val road = firstStep.road?.name ?: currentStreet
         val nextEvent = mapNavigationTypeToNextEvent(maneuver?.type ?: NavigationStatus.NavigationManeuver.NavigationType.UNKNOWN)
@@ -130,8 +158,8 @@ class AapNavigation(
         val turnAngle = maneuver?.roundaboutExitAngle
 
         sendNavigationBroadcast(
-            distanceMeters = distanceMeters,
-            timeSeconds = timeSeconds,
+            distanceMeters = lastKnownDistance,
+            timeSeconds = lastKnownTime,
             road = road,
             nextEventType = nextEvent,
             turnSide = turnSide,
@@ -142,7 +170,7 @@ class AapNavigation(
         if (settings.showNavigationNotifications) {
             val actionText = nextEventToAction(nextEvent)
             val street = road.ifBlank { currentStreet }.ifBlank { "—" }
-            showNotification(distanceMeters = distanceMeters, action = actionText, street = street)
+            showNotification(distanceMeters = lastKnownDistance, action = actionText, street = street)
         }
     }
 

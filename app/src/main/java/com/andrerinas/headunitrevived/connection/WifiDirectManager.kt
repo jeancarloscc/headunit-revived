@@ -142,7 +142,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 // fires so that localDeviceAddress is guaranteed to be set before onGroupInfoAvailable
                 // runs. This eliminates the race condition that caused empty BSSIDs on Android 12+.
                 WifiDirectCompat.requestDeviceInfo(manager, channel) { address ->
-                    AppLog.d("WifiDirectManager: Updated localDeviceAddress: $address")
+                    AppLog.i("WifiDirectManager: Updated localDeviceAddress via requestDeviceInfo: $address")
                     localDeviceAddress = address
                     manager?.requestGroupInfo(channel, this@WifiDirectManager)
                 }
@@ -188,34 +188,49 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                 }
             }
             discoveredInterface = iface
-
             var bssid = getWifiDirectMac(iface)
+            AppLog.i("WifiDirectManager: Initial BSSID from scan: $bssid")
 
             // [FIX] Robust BSSID detection for masked MACs (00:00 or 02:00)
             if (bssid == "00:00:00:00:00:00" || bssid == "02:00:00:00:00:00") {
+                AppLog.i("WifiDirectManager: BSSID is masked. Starting fallbacks...")
+                
                 // Fallback 1: Use last known valid BSSID
                 if (!lastKnownBssid.isNullOrEmpty() && lastKnownBssid != "00:00:00:00:00:00" && lastKnownBssid != "02:00:00:00:00:00") {
-                    AppLog.i("WifiDirectManager: BSSID masked, using lastKnownBssid: $lastKnownBssid")
+                    AppLog.i("WifiDirectManager: Fallback 1 - Using lastKnownBssid: $lastKnownBssid")
                     bssid = lastKnownBssid!!
                 }
-                // Fallback 2: Use captured localDeviceAddress (from THIS_DEVICE_CHANGED or requestDeviceInfo)
+                // Fallback 2: Use captured localDeviceAddress
                 else if (!localDeviceAddress.isNullOrEmpty() && localDeviceAddress != "00:00:00:00:00:00" && localDeviceAddress != "02:00:00:00:00:00") {
-                    AppLog.i("WifiDirectManager: BSSID masked, using localDeviceAddress: $localDeviceAddress")
+                    AppLog.i("WifiDirectManager: Fallback 2 - Using localDeviceAddress: $localDeviceAddress")
                     bssid = localDeviceAddress!!
                 } 
                 // Fallback 3: Use group.owner.deviceAddress
                 else {
                     val ownerAddr = group.owner?.deviceAddress
+                    AppLog.i("WifiDirectManager: Fallback 3 - group.owner.deviceAddress: $ownerAddr")
                     if (!ownerAddr.isNullOrEmpty() && ownerAddr != "00:00:00:00:00:00" && ownerAddr != "02:00:00:00:00:00") {
-                        AppLog.i("WifiDirectManager: BSSID masked, using group.owner.deviceAddress: $ownerAddr")
+                        AppLog.i("WifiDirectManager: Fallback 3 - Selected group.owner.deviceAddress: $ownerAddr")
                         bssid = ownerAddr
-                    } 
-                    // Fallback 4: Shell command or sysfs
-                    else {
+                    } else {
+                        AppLog.i("WifiDirectManager: Fallback 4 - Attempting shell/sysfs for $iface...")
                         val shellMac = getMacFromShell(iface)
                         if (shellMac != null) {
-                            AppLog.i("WifiDirectManager: BSSID masked, using shell/sysfs fallback: $shellMac")
+                            AppLog.i("WifiDirectManager: Fallback 4 - Selected shell/sysfs MAC: $shellMac")
                             bssid = shellMac
+                        } else {
+                            // Fallback 5: Try Settings.Secure (Samsung/Pixel trick)
+                            try {
+                                val secureMac = android.provider.Settings.Secure.getString(context.contentResolver, "wifi_p2p_device_address")
+                                if (!secureMac.isNullOrEmpty() && secureMac != "00:00:00:00:00:00" && secureMac != "02:00:00:00:00:00") {
+                                    AppLog.i("WifiDirectManager: Fallback 5 - Selected MAC from Settings.Secure: $secureMac")
+                                    bssid = secureMac
+                                } else {
+                                    AppLog.w("WifiDirectManager: All fallbacks failed! BSSID is still zeroed.")
+                                }
+                            } catch (e: Exception) {
+                                AppLog.w("WifiDirectManager: Fallback 5 failed: ${e.message}")
+                            }
                         }
                     }
                 }
@@ -300,11 +315,22 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     }
 
     private fun getWifiDirectMac(ifaceName: String?): String {
+        AppLog.i("WifiDirectManager: getWifiDirectMac for interface: ${ifaceName ?: "any"}")
         try {
             val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
             while (interfaces.hasMoreElements()) {
                 val iface = interfaces.nextElement()
+                val mac = iface.hardwareAddress
+                val macStr = if (mac != null) {
+                    val sb = StringBuilder()
+                    for (i in mac.indices) {
+                        sb.append(String.format("%02X%s", mac[i], if (i < mac.size - 1) ":" else ""))
+                    }
+                    sb.toString()
+                } else "null"
                 
+                AppLog.i("WifiDirectManager: Found interface: ${iface.name}, MAC: $macStr")
+
                 // If we have a name, it must match.
                 if (ifaceName != null && iface.name != ifaceName) continue
                 
@@ -314,19 +340,15 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                     if (!name.contains("p2p") && !name.contains("wlan") && !name.contains("ap")) continue
                 }
 
-                val mac = iface.hardwareAddress
-                if (mac != null) {
-                    val sb = StringBuilder()
-                    for (i in mac.indices) {
-                        sb.append(String.format("%02X%s", mac[i], if (i < mac.size - 1) ":" else ""))
-                    }
-                    val result = sb.toString()
-                    if (result != "00:00:00:00:00:00" && result != "02:00:00:00:00:00") {
-                        return result
-                    }
+                if (macStr != "null" && macStr != "00:00:00:00:00:00" && macStr != "02:00:00:00:00:00") {
+                    AppLog.i("WifiDirectManager: Selected MAC for ${iface.name}: $macStr")
+                    return macStr
                 }
             }
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+            AppLog.e("WifiDirectManager: Error scanning network interfaces", e)
+        }
+        AppLog.w("WifiDirectManager: No valid MAC found in NetworkInterface scan for ${ifaceName ?: "any"}")
         return "00:00:00:00:00:00"
     }
 
@@ -614,43 +636,58 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private fun getMacFromShell(iface: String?): String? {
         // Fallback: If iface is null, try to find a p2p interface name
         val targetIface = iface ?: getInterfaceByIp("192.168.49.1") ?: discoveredInterface
-        if (targetIface == null) {
-            AppLog.w("WifiDirectManager: getMacFromShell: No interface name available for shell/sysfs lookup.")
-            return null
-        }
         
-        // Try reading directly from sysfs (often allowed even when ip link is not)
-        try {
-            val file = java.io.File("/sys/class/net/$targetIface/address")
-            if (file.exists()) {
-                val mac = file.readText().trim().lowercase()
-                if (mac.isNotEmpty() && mac != "00:00:00:00:00:00" && mac != "02:00:00:00:00:00") {
-                    AppLog.i("WifiDirectManager: MAC retrieved via sysfs ($targetIface): $mac")
-                    return mac
+        if (targetIface != null) {
+            // Try reading directly from sysfs
+            try {
+                val file = java.io.File("/sys/class/net/$targetIface/address")
+                if (file.exists()) {
+                    val mac = file.readText().trim().lowercase()
+                    if (mac.isNotEmpty() && mac != "00:00:00:00:00:00" && mac != "02:00:00:00:00:00") {
+                        AppLog.i("WifiDirectManager: MAC retrieved via sysfs ($targetIface): $mac")
+                        return mac
+                    }
                 }
-            }
-        } catch (e: Exception) {
-            AppLog.w("WifiDirectManager: Failed to read MAC from sysfs for $targetIface: ${e.message}")
+            } catch (e: Exception) {}
+
+            // Try ip link
+            try {
+                val process = Runtime.getRuntime().exec("ip link show $targetIface")
+                val reader = process.inputStream.bufferedReader()
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    val match = Regex("link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})").find(line ?: "")
+                    if (match != null) {
+                        val mac = match.groupValues[1].lowercase()
+                        if (mac != "00:00:00:00:00:00" && mac != "02:00:00:00:00:00") return mac
+                    }
+                }
+            } catch (e: Exception) {}
         }
 
-        return try {
-            val process = Runtime.getRuntime().exec("ip link show $targetIface")
-            val reader = process.inputStream.bufferedReader()
-            var line: String?
-            var mac: String? = null
-            while (reader.readLine().also { line = it } != null) {
-                // Look for "link/ether aa:bb:cc:dd:ee:ff"
-                val match = Regex("link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})").find(line ?: "")
-                if (match != null) {
-                    mac = match.groupValues[1]
-                    break
+        // LAST RESORT: Scan ALL interfaces in sysfs for anything that looks like P2P
+        AppLog.i("WifiDirectManager: getMacFromShell: Target failed, scanning ALL interfaces in sysfs...")
+        try {
+            val netDir = java.io.File("/sys/class/net")
+            val interfaces = netDir.listFiles()
+            if (interfaces != null) {
+                for (dir in interfaces) {
+                    val name = dir.name.lowercase()
+                    if (name.contains("p2p") || name.contains("wlan") || name.contains("ap")) {
+                        val addrFile = java.io.File(dir, "address")
+                        if (addrFile.exists()) {
+                            val mac = addrFile.readText().trim().lowercase()
+                            if (mac.isNotEmpty() && mac != "00:00:00:00:00:00" && mac != "02:00:00:00:00:00") {
+                                AppLog.i("WifiDirectManager: Last resort MAC found on ${dir.name}: $mac")
+                                return mac
+                            }
+                        }
+                    }
                 }
             }
-            process.waitFor()
-            if (mac == "00:00:00:00:00:00" || mac == "02:00:00:00:00:00") null else mac
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) {}
+
+        return null
     }
 
     fun stop() {
