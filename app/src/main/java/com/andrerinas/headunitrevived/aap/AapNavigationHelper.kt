@@ -10,6 +10,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.andrerinas.headunitrevived.R
 import com.andrerinas.headunitrevived.aap.protocol.proto.NavigationStatus
+import com.andrerinas.headunitrevived.aap.protocol.proto.NavigationStatus.NextTurnDetail.NextEvent as LegacyNextEvent
+import com.andrerinas.headunitrevived.aap.protocol.proto.NavigationStatus.NextTurnDetail.Side as LegacySide
 import com.andrerinas.headunitrevived.contract.NavigationUpdateIntent
 import com.andrerinas.headunitrevived.utils.AppLog
 
@@ -42,16 +44,28 @@ class AapNavigationHelper(
         val distanceMeters: Int?,
         val timeSeconds: Int?,
         val road: String,
+        @Deprecated(
+            message = "Legacy NextTurnDetail.NextEvent wire value; remove with NavigationUpdateIntent.nextEventType and maneuverTypeToLegacyNextEvent.",
+            level = DeprecationLevel.WARNING
+        )
         val nextEventType: Int,
         val actionText: String,
+        @Deprecated(
+            message = "Legacy NextTurnDetail.Side (1/2/3); remove with NavigationUpdateIntent.turnSide and maneuverTypeToLegacyTurnSide.",
+            level = DeprecationLevel.WARNING
+        )
         val turnSide: Int?,
         val turnNumber: Int?,
         val turnAngle: Int?,
-        val nextManeuver: Int?
+        val nextManeuver: Int?,
+        val totalDistanceMeters: Int?,
+        val totalTimeSeconds: Long?,
+        val estimatedArrival: String?
     )
 
     fun nowElapsedRealtimeMs(): Long = SystemClock.elapsedRealtime()
 
+    @Suppress("DEPRECATION") // Single bridge: legacy nextEventType/turnSide → NavigationUpdateIntent
     fun sendFullNavigationBroadcast(snapshot: NavigationSnapshot, navEventType: Int) {
         val prepared = prepareFullNavigationMessage(snapshot, navEventType)
         val intent = NavigationUpdateIntent(
@@ -63,18 +77,44 @@ class AapNavigationHelper(
             turnSide = prepared.turnSide,
             turnNumber = prepared.turnNumber,
             turnAngle = prepared.turnAngle,
-            //nextManeuver = prepared.NextManeuver
+            totalDistanceMeters = prepared.totalDistanceMeters,
+            totalTimeSeconds = prepared.totalTimeSeconds,
+            estimatedArrival = prepared.estimatedArrival
         )
         context.applicationContext.sendBroadcast(intent)
     }
 
     fun showNotificationForSnapshot(snapshot: NavigationSnapshot, distanceMeters: Int?) {
         val detail = snapshot.nextTurnDetail?.payload
-        val action = detail
+        val state = snapshot.navigationState?.payload
+        val currentPosition = snapshot.currentPosition?.payload
+        val actionFromDetail = detail
             ?.takeIf { it.hasNextTurn() }
             ?.let { nextEventToAction(it.nextTurn) }
-            ?: context.getString(R.string.nav_action_unknown)
-        val street = (snapshot.currentStreet?.payload ?: detail?.road ?: "").ifBlank { "—" }
+        val actionFromState = state?.stepsList?.firstOrNull()
+            ?.takeIf { it.hasManeuver() }
+            ?.maneuver
+            ?.type
+            ?.let { maneuverTypeToAction(it) }
+        val action = actionFromDetail ?: actionFromState ?: context.getString(R.string.nav_action_unknown)
+
+        val roadFromPosition = currentPosition
+            ?.takeIf { it.hasCurrentRoad() && it.currentRoad.hasName() }
+            ?.currentRoad
+            ?.name
+            ?.takeIf { it.isNotBlank() }
+        val roadFromState = state?.stepsList?.firstOrNull()
+            ?.takeIf { it.hasRoad() && it.road.hasName() }
+            ?.road
+            ?.name
+            ?.takeIf { it.isNotBlank() }
+        val street = (
+            roadFromPosition
+                ?: snapshot.currentStreet?.payload?.takeIf { it.isNotBlank() }
+                ?: detail?.road?.takeIf { it.isNotBlank() }
+                ?: roadFromState
+                ?: ""
+            ).ifBlank { "—" }
         showNotification(distanceMeters = distanceMeters, action = action, street = street)
     }
 
@@ -84,6 +124,7 @@ class AapNavigationHelper(
             .cancel(NAV_NOTIFICATION_ID)
     }
 
+    @Suppress("DEPRECATION") // Localized use of deprecated legacy mapping until broadcast API drops NextTurnDetail fields
     private fun prepareFullNavigationMessage(snapshot: NavigationSnapshot, navEventType: Int): FullNavigationMessage {
         val detail = snapshot.nextTurnDetail?.payload
         val turnDistance = snapshot.nextTurnDistance?.payload
@@ -120,12 +161,20 @@ class AapNavigationHelper(
             ?: detail?.road?.takeIf { it.isNotBlank() }
             ?: "").ifBlank { "—" }
 
+        val maneuverType = state?.stepsList?.firstOrNull()
+            ?.takeIf { it.hasManeuver() }
+            ?.maneuver
+            ?.takeIf { it.hasType() }
+            ?.type
+
         val nextEventType = detail?.takeIf { it.hasNextTurn() }?.nextTurn?.number
-            ?: NavigationStatus.NextTurnDetail.NextEvent.UNKNOWN.number
+            ?: (maneuverType?.let { maneuverTypeToLegacyNextEvent(it) }
+                ?: LegacyNextEvent.UNKNOWN.number)
         val turnSide = detail
             ?.takeIf { it.hasSide() }
             ?.side
             ?.number
+            ?: maneuverType?.let { maneuverTypeToLegacyTurnSide(it) }
         val nextManeuver = state?.stepsList?.firstOrNull()?.maneuver?.type?.number
         val turnNumber = state?.stepsList?.firstOrNull()?.maneuver?.roundaboutExitNumber
             ?: detail?.takeIf { it.hasTurnNumber() }?.turnNumber
@@ -139,12 +188,21 @@ class AapNavigationHelper(
             ?.type
             ?.let { maneuverTypeToAction(it) }
         val actionText = actionFromDetail ?: actionFromState ?: context.getString(R.string.nav_action_unknown)
-        val totalDistanceMeters = currentPosition?.destinationDistancesList?.firstOrNull()?.distance?.meters
-        val totalTimeSeconds = currentPosition?.destinationDistancesList?.firstOrNull()?.timeToArrivalSeconds
-        val estimatedArrival = currentPosition?.destinationDistancesList?.firstOrNull()?.estimatedTimeAtArrival
-        if (state?.stepsList?.firstOrNull()?.lanesList?.isNotEmpty() ?: false) {
-            Log.w("", "has lines!")
-        }
+
+        val destFirst = currentPosition?.destinationDistancesList?.firstOrNull()
+        val totalDistanceMeters = destFirst
+            ?.takeIf { it.hasDistance() && it.distance.hasMeters() }
+            ?.distance
+            ?.meters
+            ?.takeIf { it >= 0 }
+        val totalTimeSeconds = destFirst
+            ?.takeIf { it.hasTimeToArrivalSeconds() }
+            ?.timeToArrivalSeconds
+            ?.takeIf { it >= 0L }
+        val estimatedArrival = destFirst
+            ?.takeIf { it.hasEstimatedTimeAtArrival() }
+            ?.estimatedTimeAtArrival
+            ?.takeIf { it.isNotBlank() }
 
         AppLog.d(
             "Nav: emit debounced eventType=$navEventType " +
@@ -165,9 +223,9 @@ class AapNavigationHelper(
             turnNumber = turnNumber,
             turnAngle = turnAngle,
             nextManeuver = nextManeuver,
-//            totalDistanceMeters = totalDistanceMeters,
-//            totalTimeSeconds = totalTimeSeconds,
-//            estimatedArrival = estimatedArrival
+            totalDistanceMeters = totalDistanceMeters,
+            totalTimeSeconds = totalTimeSeconds,
+            estimatedArrival = estimatedArrival
         )
     }
 
@@ -219,6 +277,111 @@ class AapNavigationHelper(
             NavigationStatus.NextTurnDetail.NextEvent.FERRY_BOAT -> context.getString(R.string.nav_action_ferry)
             NavigationStatus.NextTurnDetail.NextEvent.FERRY_TRAIN -> context.getString(R.string.nav_action_ferry_train)
             NavigationStatus.NextTurnDetail.NextEvent.DESTINATION -> context.getString(R.string.nav_action_destination)
+        }
+    }
+
+    /**
+     * Maps instrument-cluster [NavigationManeuver.NavigationType] to legacy broadcast
+     * [NextTurnDetail.NextEvent] wire values expected by external consumers.
+     */
+    @Deprecated(
+        message = "Remove together with FullNavigationMessage.nextEventType and NavigationUpdateIntent.nextEventType.",
+        level = DeprecationLevel.WARNING
+    )
+    private fun maneuverTypeToLegacyNextEvent(
+        type: NavigationStatus.NavigationManeuver.NavigationType
+    ): Int {
+        return when (type) {
+            NavigationStatus.NavigationManeuver.NavigationType.UNKNOWN -> LegacyNextEvent.UNKNOWN.number
+            NavigationStatus.NavigationManeuver.NavigationType.DEPART -> LegacyNextEvent.DEPART.number
+            NavigationStatus.NavigationManeuver.NavigationType.NAME_CHANGE -> LegacyNextEvent.NAME_CHANGE.number
+            NavigationStatus.NavigationManeuver.NavigationType.KEEP_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.KEEP_RIGHT -> LegacyNextEvent.STRAIGHT.number
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SLIGHT_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SLIGHT_RIGHT -> LegacyNextEvent.SLIGHT_TURN.number
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_NORMAL_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_NORMAL_RIGHT -> LegacyNextEvent.TURN.number
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SHARP_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SHARP_RIGHT -> LegacyNextEvent.SHARP_TURN.number
+            NavigationStatus.NavigationManeuver.NavigationType.U_TURN_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.U_TURN_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_U_TURN_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_U_TURN_RIGHT -> LegacyNextEvent.U_TURN.number
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SLIGHT_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SLIGHT_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_NORMAL_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_NORMAL_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SHARP_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SHARP_RIGHT -> LegacyNextEvent.ON_RAMP.number
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_SLIGHT_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_SLIGHT_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_NORMAL_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_NORMAL_RIGHT -> LegacyNextEvent.OFFRAMP.number
+            NavigationStatus.NavigationManeuver.NavigationType.FORK_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.FORK_RIGHT -> LegacyNextEvent.FORK.number
+            NavigationStatus.NavigationManeuver.NavigationType.MERGE_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.MERGE_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.MERGE_SIDE_UNSPECIFIED -> LegacyNextEvent.MERGE.number
+            NavigationStatus.NavigationManeuver.NavigationType.ROUNDABOUT_ENTER -> LegacyNextEvent.ROUNDABOUT_ENTER.number
+            NavigationStatus.NavigationManeuver.NavigationType.ROUNDABOUT_EXIT -> LegacyNextEvent.ROUNDABOUT_EXIT.number
+            NavigationStatus.NavigationManeuver.NavigationType.ROUNDABOUT_ENTER_AND_EXIT_CW,
+            NavigationStatus.NavigationManeuver.NavigationType.ROUNDABOUT_ENTER_AND_EXIT_CW_WITH_ANGLE,
+            NavigationStatus.NavigationManeuver.NavigationType.ROUNDABOUT_ENTER_AND_EXIT_CCW,
+            NavigationStatus.NavigationManeuver.NavigationType.ROUNDABOUT_ENTER_AND_EXIT_CCW_WITH_ANGLE ->
+                LegacyNextEvent.ROUNDABOUT_ENTER_AND_EXIT.number
+            NavigationStatus.NavigationManeuver.NavigationType.STRAIGHT -> LegacyNextEvent.STRAIGHT.number
+            NavigationStatus.NavigationManeuver.NavigationType.FERRY_BOAT -> LegacyNextEvent.FERRY_BOAT.number
+            NavigationStatus.NavigationManeuver.NavigationType.FERRY_TRAIN -> LegacyNextEvent.FERRY_TRAIN.number
+            NavigationStatus.NavigationManeuver.NavigationType.DESTINATION,
+            NavigationStatus.NavigationManeuver.NavigationType.DESTINATION_STRAIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.DESTINATION_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.DESTINATION_RIGHT -> LegacyNextEvent.DESTINATION.number
+        }
+    }
+
+    /**
+     * Maps [NavigationManeuver.NavigationType] to legacy [NextTurnDetail.Side] (1=LEFT, 2=RIGHT).
+     * Returns null when side is not meaningful → [NavigationUpdateIntent] uses UNSPECIFIED (3).
+     */
+    @Deprecated(
+        message = "Remove together with FullNavigationMessage.turnSide and NavigationUpdateIntent.turnSide.",
+        level = DeprecationLevel.WARNING
+    )
+    private fun maneuverTypeToLegacyTurnSide(
+        type: NavigationStatus.NavigationManeuver.NavigationType
+    ): Int? {
+        return when (type) {
+            NavigationStatus.NavigationManeuver.NavigationType.KEEP_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SLIGHT_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_NORMAL_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SHARP_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.U_TURN_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SLIGHT_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_NORMAL_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SHARP_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_U_TURN_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_SLIGHT_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_NORMAL_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.FORK_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.MERGE_LEFT,
+            NavigationStatus.NavigationManeuver.NavigationType.DESTINATION_LEFT -> LegacySide.LEFT.number
+
+            NavigationStatus.NavigationManeuver.NavigationType.KEEP_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SLIGHT_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_NORMAL_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.TURN_SHARP_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.U_TURN_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SLIGHT_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_NORMAL_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_SHARP_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.ON_RAMP_U_TURN_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_SLIGHT_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.OFF_RAMP_NORMAL_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.FORK_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.MERGE_RIGHT,
+            NavigationStatus.NavigationManeuver.NavigationType.DESTINATION_RIGHT -> LegacySide.RIGHT.number
+
+            else -> null
         }
     }
 
