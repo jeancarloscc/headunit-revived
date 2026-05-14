@@ -180,14 +180,9 @@ class AapNavigationHelper(
             ?: detail?.takeIf { it.hasTurnNumber() }?.turnNumber
         val turnAngle = state?.stepsList?.firstOrNull()?.maneuver?.roundaboutExitAngle
             ?: detail?.takeIf { it.hasTurnAngle() }?.turnAngle
-        val actionFromDetail = state?.stepsList?.firstOrNull()?.maneuver?.type?.let { maneuverTypeToAction(it) }
-            ?: detail?.takeIf { it.hasNextTurn() }?.let { nextEventToAction(it.nextTurn) }
-        val actionFromState = state?.stepsList?.firstOrNull()
-            ?.takeIf { it.hasManeuver() }
-            ?.maneuver
-            ?.type
-            ?.let { maneuverTypeToAction(it) }
-        val actionText = actionFromDetail ?: actionFromState ?: context.getString(R.string.nav_action_unknown)
+val actionText = state?.stepsList?.firstOrNull()?.maneuver?.type?.let { maneuverTypeToAction(it) }
+    ?: detail?.takeIf { it.hasNextTurn() }?.let { nextEventToAction(it.nextTurn) }
+    ?: context.getString(R.string.nav_action_unknown)
 
         val destFirst = currentPosition?.destinationDistancesList?.firstOrNull()
         val totalDistanceMeters = destFirst
