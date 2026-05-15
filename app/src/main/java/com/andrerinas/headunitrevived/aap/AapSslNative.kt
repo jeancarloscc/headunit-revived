@@ -115,8 +115,7 @@ internal class AapSslNative : AapSsl {
     
     // Stub for reset
     override fun postHandshakeReset() {
-        AppLog.i("Native SSL: postHandshakeReset, clearing native state")
-        native_ssl_cleanup()
+        // No-op for Native SSL
     }
 
     override fun release() {
