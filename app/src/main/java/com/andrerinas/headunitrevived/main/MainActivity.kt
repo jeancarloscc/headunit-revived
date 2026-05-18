@@ -259,8 +259,6 @@ class MainActivity : BaseActivity() {
     private fun handleLaunchIntent(intent: Intent?) {
         if (intent == null) return
 
-        AppLog.i("MainActivity: Processing launch intent: ${intent.action}, data: ${intent.data}")
-
         val intentData = intent.data
         val intentAction = intent.action
 
