@@ -195,6 +195,7 @@ class AapService : Service(), UsbReceiver.Listener {
     private var accessoryHandshakeFailures = 0
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var wifiLock: WifiManager.WifiLock? = null
+    private var isCarKeyReceiverRegistered = false
 
     private var wifiReadyCallback: ConnectivityManager.NetworkCallback? = null
 
@@ -336,7 +337,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
     private fun resolveIsPlayingFromStatus(status: MediaPlayback.MediaPlaybackStatus): Boolean {
         if (!status.hasState()) return lastAaPlaybackIsPlaying ?: mediaSessionIsPlaying
-        return when (val s = status.state) {
+        return when (status.state) {
             MediaPlayback.MediaPlaybackStatus.State.PLAYING -> true
             MediaPlayback.MediaPlaybackStatus.State.STOPPED,
             MediaPlayback.MediaPlaybackStatus.State.PAUSED -> false
@@ -892,19 +893,23 @@ class AapService : Service(), UsbReceiver.Listener {
         }
 
         // Register the comprehensive steering wheel key receiver
-        val filter = IntentFilter().apply {
-            priority = 1000
-            CarKeyReceiver.ACTIONS.forEach { addAction(it) }
-        }
-        try {
-            ContextCompat.registerReceiver(
-                this,
-                carKeyReceiver,
-                filter,
-                ContextCompat.RECEIVER_EXPORTED
-            )
-        } catch (e: Exception) {
-            AppLog.e("AapService: Failed to register CarKeyReceiver", e)
+        if (!isCarKeyReceiverRegistered) {
+            val filter = IntentFilter().apply {
+                priority = 1000
+                CarKeyReceiver.ACTIONS.forEach { addAction(it) }
+            }
+            try {
+                ContextCompat.registerReceiver(
+                    this,
+                    carKeyReceiver,
+                    filter,
+                    ContextCompat.RECEIVER_EXPORTED
+                )
+                isCarKeyReceiverRegistered = true
+                AppLog.d("AapService: CarKeyReceiver registered")
+            } catch (e: Exception) {
+                AppLog.e("AapService: Failed to register CarKeyReceiver", e)
+            }
         }
 
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
@@ -948,7 +953,7 @@ class AapService : Service(), UsbReceiver.Listener {
 
                         // Only handle ACTION_DOWN to prevent double triggers from standard Android behavior.
                         // Physical double triggers are handled by CommManager.sendKey deduplication.
-                        if (keyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
+                        if (keyEvent.action == android.view.KeyEvent.ACTION_DOWN && keyEvent.repeatCount == 0) {
                             AppLog.i("MediaButtonEvent: Processing key ${keyEvent.keyCode}")
                             // Send a complete click sequence (press + release) immediately
                             commManager.sendKey(keyEvent.keyCode, true)
@@ -1015,9 +1020,15 @@ class AapService : Service(), UsbReceiver.Listener {
         silentAudioPlayer?.stop()
         // Release any permanent audio focus we may have requested when connected
         releasePermanentAudioFocus()
-        try {
-            carKeyReceiver?.let { unregisterReceiver(it) }
-        } catch (e: Exception) {}
+        if (isCarKeyReceiverRegistered) {
+            try {
+                carKeyReceiver?.let { unregisterReceiver(it) }
+            } catch (e: Exception) {
+                AppLog.e("AapService: Failed to unregister CarKeyReceiver", e)
+            } finally {
+                isCarKeyReceiverRegistered = false
+            }
+        }
 
         if (!isDestroying) updateNotification()
         mediaMetadataDecodeJob?.cancel()
@@ -1403,11 +1414,10 @@ class AapService : Service(), UsbReceiver.Listener {
 
             // Mode 3: Native AA Wireless
             if (mode == 3) {
-                val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
-                if (wifiManager.isWifiEnabled) {
-                    // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
-                    wifiDirectManager?.startNativeAaQuietHost()
-                }
+                // Start WiFi Direct as a "quiet host" (P2P Group for phone to join)
+                // We let WifiDirectManager handle the WiFi state (enabling if needed)
+                wifiDirectManager?.startNativeAaQuietHost()
+                
                 // Start the official Bluetooth handshake servers
                 nativeAaHandshakeManager?.start()
             }
@@ -1529,6 +1539,10 @@ class AapService : Service(), UsbReceiver.Listener {
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(mediaButtonReceiver) } catch (_: Exception) {}
         try { unregisterReceiver(wakeDetectReceiver) } catch (_: Exception) {}
+        if (isCarKeyReceiverRegistered) {
+            try { carKeyReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
+            isCarKeyReceiverRegistered = false
+        }
         try { wifiAutoStartReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         uiModeManager.disableCarMode(0)
         serviceScope.cancel()
@@ -1977,6 +1991,18 @@ class AapService : Service(), UsbReceiver.Listener {
         wirelessServer = WirelessServer().apply { start(registerNsd = shouldRegisterNsd) }
         if (shouldRegisterNsd) {
             startDiscovery()
+        }
+    }
+
+    /**
+     * Triggers a refresh of the WiFi Direct "quiet host" state.
+     * Called by NativeAaHandshakeManager if it's waiting for credentials that haven't arrived yet.
+     */
+    fun triggerWifiDirectRefresh() {
+        AppLog.i("AapService: WiFi Direct refresh requested.")
+        val mode = App.provide(this).settings.wifiConnectionMode
+        if (mode == 3) {
+            wifiDirectManager?.startNativeAaQuietHost()
         }
     }
 

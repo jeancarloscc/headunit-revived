@@ -104,7 +104,7 @@ android {
         applicationId = "com.andrerinas.headunitrevived"
         minSdk = 16
         targetSdk = 36
-        versionCode = 66
+        versionCode = 70
         versionName = "3.0.0-alpha"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -114,6 +114,12 @@ android {
         // Store available locales in BuildConfig for runtime access
         // This is scanned at build time from values-XX directories
         buildConfigField("String", "AVAILABLE_LOCALES", "\"${availableLocales.joinToString(",")}\"")
+
+        externalNativeBuild {
+            cmake {
+                cppFlags("")
+            }
+        }
     }
 
     flavorDimensions.add("distribution")

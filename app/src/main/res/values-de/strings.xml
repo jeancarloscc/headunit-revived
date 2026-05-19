@@ -251,6 +251,8 @@
     <string name="category_audio">Audio</string>
     <string name="enable_audio_sink">Audio-Ausgabe</string>
     <string name="enable_audio_sink_description">Wenn deaktiviert, empfängt die Headunit keinen Ton. Der Ton wird über das Handy abgespielt.</string>
+    <string name="static_audio_focus">Statischer Audio-Fokus</string>
+    <string name="static_audio_focus_description">Zwingt das Telefon dazu, zu glauben, dass der Audio-Fokus dauerhaft gehalten wird. Verhindert Ton-Ausfälle auf chinesischen Headunits. Aktiviert Software-Ducking für Navigationsansagen.</string>
     <string name="separate_audio_streams">Separate Audio-Streams</string>
     <string name="separate_audio_streams_description">Trenne Audiokanäle für Musik, Anrufe und Benachrichtigungen statt eines einzelnen Multimedia-Streams (funktioniert auf einigen Geräten möglicherweise nicht richtig).</string>
     <string name="use_aac_audio">AAC-Audio verwenden</string>
@@ -276,6 +278,7 @@
     <string name="mic_noise_suppressor_description">Versucht, Hintergrundgeräusche zu reduzieren. Deaktivieren, wenn die Stimme dumpf klingt.</string>
     <string name="mic_auto_gain_control">Automatische Pegelanpassung (AGC)</string>
     <string name="mic_auto_gain_control_description">Passt die Mikrofonlautstärke automatisch an. Deaktivieren bei instabiler Lautstärke.</string>
+    <string name="mic_feature_unsupported">Diese Funktion wird auf Ihrem Gerät nicht unterstützt.</string>
 
     <!-- Info Settings -->
     <string name="category_info">Info</string>
@@ -428,6 +431,9 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Fahrzeuginformationen</string>
     <string name="vehicle_info_settings_description">Passen Sie an, wie Ihr Fahrzeug auf Ihrem Telefon angezeigt wird</string>
+    <string name="ui_scale">UI-Skalierung</string>
+    <string name="ui_scale_home">Startbildschirm</string>
+    <string name="ui_scale_settings">Einstellungsbildschirm</string>
     <string name="category_vehicle">Fahrzeug</string>
     <string name="category_head_unit">Autoradio</string>
     <string name="vehicle_display_name_label">Anzeigename</string>
@@ -524,4 +530,7 @@
     <string name="loading_screen_recommended_aspect_ratio">Empfohlenes Seitenverhältnis: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Tippen Sie auf die Vorschau, um sie im Vollbild zu sehen</string>
     <string name="loading_screen_loop_video">Kurze Animationen wiederholen</string>
+    <string name="bt_permission_denied">Bluetooth-Berechtigung verweigert. Suche nach Geräten nicht möglich.</string>
+    <string name="wifi_autostart_title">WiFi Auto-Start</string>
+    <string name="wifi_autostart_content">Verbunden mit %s. Tippen, um Android Auto zu starten.</string>
 </resources>

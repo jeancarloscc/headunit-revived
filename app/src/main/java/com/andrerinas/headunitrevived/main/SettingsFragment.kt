@@ -55,6 +55,7 @@ class SettingsFragment : Fragment() {
     private var pendingFpsLimit: Int? = null
     private var pendingBluetoothAddress: String? = null
     private var pendingEnableAudioSink: Boolean? = null
+    private var pendingStaticAudioFocus: Boolean? = null
     private var pendingSeparateAudioStreams: Boolean? = null
     private var pendingUseAacAudio: Boolean? = null
     private var pendingMicInputSource: Int? = null
@@ -83,6 +84,9 @@ class SettingsFragment : Fragment() {
     private var pendingInsetTop: Int? = null
     private var pendingInsetRight: Int? = null
     private var pendingInsetBottom: Int? = null
+
+    private var pendingUiScaleHomePercent: Int? = null
+    private var pendingUiScaleSettingsPercent: Int? = null
 
     private var pendingMediaVolumeOffset: Int? = null
     private var pendingAssistantVolumeOffset: Int? = null
@@ -122,6 +126,7 @@ class SettingsFragment : Fragment() {
         pendingFpsLimit = settings.fpsLimit
         pendingBluetoothAddress = settings.bluetoothAddress
         pendingEnableAudioSink = settings.enableAudioSink
+        pendingStaticAudioFocus = settings.staticAudioFocus
         pendingSeparateAudioStreams = settings.separateAudioStreams
         pendingUseAacAudio = settings.useAacAudio
         pendingMicInputSource = settings.micInputSource
@@ -149,6 +154,9 @@ class SettingsFragment : Fragment() {
         pendingInsetTop = settings.insetTop
         pendingInsetRight = settings.insetRight
         pendingInsetBottom = settings.insetBottom
+        // UI Scale pending values (percent)
+        pendingUiScaleHomePercent = settings.uiScaleHomePercent
+        pendingUiScaleSettingsPercent = settings.uiScaleSettingsPercent
 
         pendingMediaVolumeOffset = settings.mediaVolumeOffset
         pendingAssistantVolumeOffset = settings.assistantVolumeOffset
@@ -251,6 +259,7 @@ class SettingsFragment : Fragment() {
         pendingFpsLimit?.let { settings.fpsLimit = it }
         pendingBluetoothAddress?.let { settings.bluetoothAddress = it }
         pendingEnableAudioSink?.let { settings.enableAudioSink = it }
+        pendingStaticAudioFocus?.let { settings.staticAudioFocus = it }
         pendingSeparateAudioStreams?.let { settings.separateAudioStreams = it }
         pendingUseAacAudio?.let { settings.useAacAudio = it }
         pendingMicInputSource?.let { settings.micInputSource = it }
@@ -336,6 +345,7 @@ class SettingsFragment : Fragment() {
                         pendingFpsLimit != settings.fpsLimit ||
                         pendingBluetoothAddress != settings.bluetoothAddress ||
                         pendingEnableAudioSink != settings.enableAudioSink ||
+                        pendingStaticAudioFocus != settings.staticAudioFocus ||
                         pendingSeparateAudioStreams != settings.separateAudioStreams ||
                         pendingUseAacAudio != settings.useAacAudio ||
                         pendingMicInputSource != settings.micInputSource ||
@@ -372,6 +382,7 @@ class SettingsFragment : Fragment() {
                           pendingForceSoftware != settings.forceSoftwareDecoding ||
                           pendingEnableRotary != settings.enableRotary ||
                           pendingEnableAudioSink != settings.enableAudioSink ||
+                          pendingStaticAudioFocus != settings.staticAudioFocus ||
                           pendingSeparateAudioStreams != settings.separateAudioStreams ||
                           pendingUseAacAudio != settings.useAacAudio ||
                           pendingAudioLatencyMultiplier != settings.audioLatencyMultiplier ||
@@ -448,6 +459,16 @@ class SettingsFragment : Fragment() {
                 try {
                     findNavController().navigate(R.id.action_settingsFragment_to_vehicleInfoFragment)
                 } catch (e: Exception) { }
+            }
+        ))
+
+        // UI Scale (example dialog similar to Custom Insets) - appear after vehicle info
+        items.add(SettingItem.SettingEntry(
+            stableId = "uiScale",
+            nameResId = R.string.ui_scale,
+            value = "${getString(R.string.ui_scale_home)}: ${pendingUiScaleHomePercent ?: 100}% · ${getString(R.string.ui_scale_settings)}: ${pendingUiScaleSettingsPercent ?: 100}%",
+            onClick = { _ ->
+                showUiScaleDialog()
             }
         ))
 
@@ -965,6 +986,20 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        if (pendingEnableAudioSink == true) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "staticAudioFocus",
+                nameResId = R.string.static_audio_focus,
+                descriptionResId = R.string.static_audio_focus_description,
+                isChecked = pendingStaticAudioFocus ?: false,
+                onCheckedChanged = { isChecked ->
+                    pendingStaticAudioFocus = isChecked
+                    checkChanges()
+                    updateSettingsList()
+                }
+            ))
+        }
+
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "separateAudioStreams",
             nameResId = R.string.separate_audio_streams,
@@ -1468,6 +1503,99 @@ class SettingsFragment : Fragment() {
                 
                 dialog.dismiss()
             }
+            .show()
+    }
+
+    private fun showUiScaleDialog() {
+        val context = requireContext()
+        val density = context.resources.displayMetrics.density
+
+        val container = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val pad = (16 * density).toInt()
+            setPadding(pad, pad, pad, pad)
+        }
+
+        fun makeRow(labelText: String, initialPercent: Int): Triple<android.widget.TextView, android.widget.SeekBar, android.widget.TextView> {
+            val label = android.widget.TextView(context).apply {
+                text = labelText
+                setPadding(0, (8 * density).toInt(), 0, (4 * density).toInt())
+            }
+            val seek = android.widget.SeekBar(context).apply {
+                // Map 100..150 step 10 -> progress 0..5
+                max = 5
+                progress = ((initialPercent - 100) / 10).coerceIn(0, 5)
+            }
+            val value = android.widget.TextView(context).apply {
+                text = "$initialPercent%"
+                setPadding(0, (4 * density).toInt(), 0, (12 * density).toInt())
+            }
+            // Update value when seek changes
+            seek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(sb: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                    val pct = 100 + progress * 10
+                    value.text = "$pct%"
+                }
+                override fun onStartTrackingTouch(sb: android.widget.SeekBar?) {}
+                override fun onStopTrackingTouch(sb: android.widget.SeekBar?) {}
+            })
+
+            return Triple(label, seek, value)
+        }
+
+        val homeInitial = pendingUiScaleHomePercent ?: settings.uiScaleHomePercent
+        val settingsInitial = pendingUiScaleSettingsPercent ?: settings.uiScaleSettingsPercent
+
+        val (homeLabel, homeSeek, homeValue) = makeRow(getString(R.string.ui_scale_home), homeInitial)
+        val (settingsLabel, settingsSeek, settingsValue) = makeRow(getString(R.string.ui_scale_settings), settingsInitial)
+
+        container.addView(homeLabel, android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(homeSeek, android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(homeValue, android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(settingsLabel, android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(settingsSeek, android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT))
+        container.addView(settingsValue, android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT))
+
+        // Wrap content in a ScrollView to ensure content is scrollable on small screens or when large scale is used
+        val scroll = android.widget.ScrollView(context).apply {
+            isFillViewport = true
+            addView(container, android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.MATCH_PARENT, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT))
+        }
+
+        MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+            .setTitle(R.string.ui_scale)
+            .setView(scroll)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                val newHome = 100 + (homeSeek.progress * 10)
+                val newSettings = 100 + (settingsSeek.progress * 10)
+                val oldSettings = settings.uiScaleSettingsPercent
+                val oldHome = settings.uiScaleHomePercent
+
+                // Persist immediately (similar to Custom Insets behavior)
+                settings.uiScaleHomePercent = newHome
+                settings.uiScaleSettingsPercent = newSettings
+                settings.commit()
+
+                pendingUiScaleHomePercent = newHome
+                pendingUiScaleSettingsPercent = newSettings
+                checkChanges()
+                updateSettingsList()
+
+                dialog.dismiss()
+
+                // If Settings value changed, recreate activity as requested
+                if (newSettings != oldSettings) {
+                    requireActivity().recreate()
+                }
+                // If Home UI scale changed, request MainActivity to recreate
+                if (newHome != oldHome) {
+                    val intent = Intent(MainActivity.ACTION_RECREATE_MAIN).apply {
+                        setPackage(requireContext().packageName)
+                    }
+                    requireContext().sendBroadcast(intent)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 

@@ -418,6 +418,9 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informace o vozidle</string>
     <string name="vehicle_info_settings_description">Přizpůsobte, jak se vaše vozidlo zobrazuje na telefonu</string>
+    <string name="ui_scale">Měřítko rozhraní</string>
+    <string name="ui_scale_home">Hlavní obrazovka</string>
+    <string name="ui_scale_settings">Obrazovka nastavení</string>
     <string name="category_vehicle">Vozidlo</string>
     <string name="category_head_unit">Autorádio</string>
     <string name="vehicle_display_name_label">Zobrazovaný název</string>
@@ -511,4 +514,16 @@
     <string name="loading_screen_recommended_aspect_ratio">Doporučený poměr stran: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Klepněte na náhled pro zobrazení na celou obrazovku</string>
     <string name="loading_screen_loop_video">Opakovat krátké animace</string>
+    <string name="microphone_settings">Nastavení mikrofonu</string>
+    <string name="microphone_settings_description">Konfigurace vstupu mikrofonu a zpracování zvuku.</string>
+    <string name="mic_echo_canceler">Potlačení ozvěny (AEC)</string>
+    <string name="mic_echo_canceler_description">Pokusí se odstranit ozvěnu z mikrofonu. Vypněte, pokud zaznamenáte ticho nebo zkreslení.</string>
+    <string name="mic_noise_suppressor">Potlačení šumu (NS)</string>
+    <string name="mic_noise_suppressor_description">Pokusí se snížit hluk na pozadí. Vypněte, pokud váš hlas zní tlumeně.</string>
+    <string name="mic_auto_gain_control">Automatické řízení zesílení (AGC)</string>
+    <string name="mic_auto_gain_control_description">Automaticky upravuje hlasitost mikrofonu. Vypněte, pokud je hlasitost nestabilní.</string>
+    <string name="mic_feature_unsupported">Tato funkce není na vašem zařízení podporována.</string>
+    <string name="bt_permission_denied">Oprávnění Bluetooth bylo zamítnuto. Nelze skenovat zařízení.</string>
+    <string name="wifi_autostart_title">Automatické spuštění WiFi</string>
+    <string name="wifi_autostart_content">Připojeno k %s. Klepnutím spustíte Android Auto.</string>
 </resources>

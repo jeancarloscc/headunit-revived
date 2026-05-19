@@ -416,6 +416,9 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Informacje o pojeździe</string>
     <string name="vehicle_info_settings_description">Dostosuj, jak pojazd jest wyświetlany na telefonie</string>
+    <string name="ui_scale">Skalowanie interfejsu</string>
+    <string name="ui_scale_home">Ekran główny</string>
+    <string name="ui_scale_settings">Ekran ustawień</string>
     <string name="category_vehicle">Pojazd</string>
     <string name="category_head_unit">Radio</string>
     <string name="vehicle_display_name_label">Nazwa wyświetlana</string>
@@ -512,4 +515,16 @@
     <string name="loading_screen_recommended_aspect_ratio">Zalecane proporcje: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Dotknij podglądu, aby zobaczyć na pełnym ekranie</string>
     <string name="loading_screen_loop_video">Powtarzaj krótkie animacje</string>
+    <string name="microphone_settings">Ustawienia mikrofonu</string>
+    <string name="microphone_settings_description">Skonfiguruj wejście mikrofonu i przetwarzanie dźwięku.</string>
+    <string name="mic_echo_canceler">Usuwanie echa (AEC)</string>
+    <string name="mic_echo_canceler_description">Próbuje usunąć echo z mikrofonu. Wyłącz, jeśli doświadczasz ciszy lub zniekształceń.</string>
+    <string name="mic_noise_suppressor">Tłumienie szumów (NS)</string>
+    <string name="mic_noise_suppressor_description">Próbuje zredukować hałas w tle. Wyłącz, jeśli Twój głos brzmi przytłumiony.</string>
+    <string name="mic_auto_gain_control">Automatyczna regulacja wzmocnienia (AGC)</string>
+    <string name="mic_auto_gain_control_description">Automatycznie dostosowuje głośność mikrofonu. Wyłącz, jeśli głośność jest niestabilna.</string>
+    <string name="mic_feature_unsupported">Ta funkcja nie jest obsługiwana na Twoim urządzeniu.</string>
+    <string name="bt_permission_denied">Odmowa uprawnień Bluetooth. Nie można skanować urządzeń.</string>
+    <string name="wifi_autostart_title">Auto-Start WiFi</string>
+    <string name="wifi_autostart_content">Połączono z %s. Dotknij, aby uruchomić Android Auto.</string>
 </resources>

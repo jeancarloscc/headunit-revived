@@ -417,6 +417,9 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Járműinformáció</string>
     <string name="vehicle_info_settings_description">Testreszabhatja, hogyan jelenik meg járműve a telefonján</string>
+    <string name="ui_scale">UI méretezés</string>
+    <string name="ui_scale_home">Kezdőképernyő</string>
+    <string name="ui_scale_settings">Beállítások képernyő</string>
     <string name="category_vehicle">Jármű</string>
     <string name="category_head_unit">Fejegység</string>
     <string name="vehicle_display_name_label">Megjelenítési név</string>
@@ -510,4 +513,16 @@
     <string name="loading_screen_recommended_aspect_ratio">Ajánlott képarány: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Érintse meg az előnézetet a teljes képernyős megjelenítéshez</string>
     <string name="loading_screen_loop_video">Rövid animációk ismétlése</string>
+    <string name="microphone_settings">Mikrofon beállítások</string>
+    <string name="microphone_settings_description">A mikrofonbemenet és a hangfeldolgozás konfigurálása.</string>
+    <string name="mic_echo_canceler">Visszhangkioltás (AEC)</string>
+    <string name="mic_echo_canceler_description">Megpróbálja eltávolítani a visszhangot a mikrofonból. Kapcsolja ki, ha csendet vagy torzítást tapasztal.</string>
+    <string name="mic_noise_suppressor">Zajcsökkentés (NS)</string>
+    <string name="mic_noise_suppressor_description">Megpróbálja csökkenteni a háttérzajt. Kapcsolja ki, ha a hangja tompának tűnik.</string>
+    <string name="mic_auto_gain_control">Automatikus erősítésszabályozás (AGC)</string>
+    <string name="mic_auto_gain_control_description">Automatikusan szabályozza a mikrofon hangerejét. Kapcsolja ki, ha a hangerő instabil.</string>
+    <string name="mic_feature_unsupported">Ez a funkció nem támogatott az eszközén.</string>
+    <string name="bt_permission_denied">Bluetooth engedély megtagadva. Nem lehet eszközöket keresni.</string>
+    <string name="wifi_autostart_title">WiFi automatikus indítás</string>
+    <string name="wifi_autostart_content">Csatlakozva a következőhöz: %s. Koppintson az Android Auto indításához.</string>
 </resources>

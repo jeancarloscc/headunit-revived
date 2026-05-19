@@ -51,6 +51,7 @@ class MainActivity : BaseActivity() {
 
     private var isOrientationReceiverRegistered = false
     private var isFinishReceiverRegistered = false
+    private var isRecreateReceiverRegistered = false
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -75,6 +76,19 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private val recreateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_RECREATE_MAIN) {
+                AppLog.i("MainActivity: Received recreate request. Recreating.")
+                try {
+                    recreate()
+                } catch (e: Exception) {
+                    AppLog.e("MainActivity: Failed to recreate activity", e)
+                }
+            }
+        }
+    }
+
     interface KeyListener {
         fun onKeyEvent(event: KeyEvent?): Boolean
     }
@@ -88,7 +102,22 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        val settings  = Settings(newBase)
+        val scale = settings.uiScaleHomePercent / 100.0f
+        if (scale != 1.0f && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val cfg = Configuration(newBase.resources.configuration)
+            val metrics = newBase.resources.displayMetrics
+            cfg.densityDpi = (metrics.densityDpi * scale).toInt()
+            val ctx = newBase.createConfigurationContext(cfg)
+            super.attachBaseContext(ctx)
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        requestedOrientation = Settings(this).screenOrientation.androidOrientation
         super.onCreate(savedInstanceState)
 
         logLaunchSource()
@@ -504,6 +533,14 @@ class MainActivity : BaseActivity() {
                 it.suspend()
             } catch (_: Exception) {}
         }
+
+        // Register recreate receiver so SettingsFragment can request MainActivity recreate
+        ContextCompat.registerReceiver(
+            this, recreateReceiver,
+            android.content.IntentFilter(ACTION_RECREATE_MAIN),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        isRecreateReceiverRegistered = true
     }
 
     private fun showSplashWithDelay(delayMs: Long) {
@@ -589,8 +626,6 @@ class MainActivity : BaseActivity() {
 
     private fun handleLaunchIntent(intent: Intent?) {
         if (intent == null) return
-
-        AppLog.i("MainActivity: Processing launch intent: ${intent.action}, data: ${intent.data}")
 
         val intentData = intent.data
         val intentAction = intent.action
@@ -756,6 +791,10 @@ class MainActivity : BaseActivity() {
             unregisterReceiver(finishReceiver)
             isFinishReceiverRegistered = false
         }
+        if (isRecreateReceiverRegistered) {
+            unregisterReceiver(recreateReceiver)
+            isRecreateReceiverRegistered = false
+        }
         if (isFinishing) {
             AppLog.i("MainActivity finishing, resetting auto-start flag.")
             HomeFragment.resetAutoStart()
@@ -780,5 +819,6 @@ class MainActivity : BaseActivity() {
          * that initiate an auto-connect; cleared by [endAutoConnect].
          */
         @Volatile var autoConnectInProgress: Boolean = false
+        const val ACTION_RECREATE_MAIN = "com.andrerinas.headunitrevived.ACTION_RECREATE_MAIN"
     }
 }

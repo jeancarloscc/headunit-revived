@@ -45,6 +45,20 @@ class AudioTrackWrapper(
     @Volatile
     private var currentGain: Float = gain
 
+    fun setVolume(gain: Float) {
+        currentGain = gain
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                audioTrack.setVolume(gain)
+            } else {
+                @Suppress("DEPRECATION")
+                audioTrack.setStereoVolume(gain, gain)
+            }
+        } catch (e: Exception) {
+            AppLog.e("Failed to set volume on AudioTrack", e)
+        }
+    }
+
     // Track frames written for better draining
     private var framesWritten: Long = 0
     private val bytesPerFrame: Int = channelCount * (if (bitDepth == 16) 2 else 1)
@@ -58,6 +72,7 @@ class AudioTrackWrapper(
     init {
         this.name = "AudioPlaybackThread"
         audioTrack = createAudioTrack(stream, sampleRateInHz, bitDepth, channelCount, audioLatencyMultiplier)
+        setVolume(gain)
         audioTrack.play()
 
         if (isAac) {

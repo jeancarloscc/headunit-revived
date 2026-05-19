@@ -416,6 +416,9 @@
     <!-- Vehicle Info Settings -->
     <string name="vehicle_info_settings">Інформація про транспортний засіб</string>
     <string name="vehicle_info_settings_description">Налаштуйте, як ваш автомобіль відображається на телефоні</string>
+    <string name="ui_scale">Масштаб інтерфейсу</string>
+    <string name="ui_scale_home">Головний екран</string>
+    <string name="ui_scale_settings">Екран налаштувань</string>
     <string name="category_vehicle">Транспортний засіб</string>
     <string name="category_head_unit">Головний пристрій</string>
     <string name="vehicle_display_name_label">Відображуване ім\'я</string>
@@ -512,4 +515,16 @@
     <string name="loading_screen_recommended_aspect_ratio">Рекомендоване співвідношення сторін: %1$d:%2$d</string>
     <string name="loading_screen_tap_fullscreen_hint">Натисніть на попередній перегляд для повноекранного режиму</string>
     <string name="loading_screen_loop_video">Повторювати короткі анімації</string>
+    <string name="microphone_settings">Налаштування мікрофона</string>
+    <string name="microphone_settings_description">Налаштування входу мікрофона та обробки звуку.</string>
+    <string name="mic_echo_canceler">Ехоподавлення (AEC)</string>
+    <string name="mic_echo_canceler_description">Спроба видалити ехо з мікрофона. Вимкніть, якщо чуєте тишу або спотворення.</string>
+    <string name="mic_noise_suppressor">Шумоподавлення (NS)</string>
+    <string name="mic_noise_suppressor_description">Спроба зменшити фоновий шум. Вимкніть, якщо ваш голос звучить приглушено.</string>
+    <string name="mic_auto_gain_control">Автоматичне регулювання посилення (AGC)</string>
+    <string name="mic_auto_gain_control_description">Автоматично регулює гучність мікрофона. Вимкніть, якщо гучність нестабільна.</string>
+    <string name="mic_feature_unsupported">Ця функція не підтримується на вашому пристрої.</string>
+    <string name="bt_permission_denied">У дозволі Bluetooth відмовлено. Неможливо сканувати пристрої.</string>
+    <string name="wifi_autostart_title">Автозапуск WiFi</string>
+    <string name="wifi_autostart_content">Підключено до %s. Натисніть, щоб запустити Android Auto.</string>
 </resources>

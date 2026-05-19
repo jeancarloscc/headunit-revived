@@ -60,7 +60,6 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Remove Native-SSL Libraries to reduce filesize
 - Add Permission Checker
 - Settings-Reset Button
-- Touch and Surface size Calibration
 
 ## Known Issues
 - **Google Maps in Portrait Mode:** Touch interactions (searching, scrolling) within Google Maps may not work as expected when using Portrait Mode on some devices. **Fix:** Try reducing the **Pixel density (DPI)** setting to **below 200** (e.g., 190) in the app settings. This often restores full functionality.
@@ -74,7 +73,13 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
 - Added: Direct Logging to file without logcat, thanks to @Anton111111
 
-### v.2.3.0-beta
+### v.2.3.1-alpha
+- Fixed a connection lost on for example borders
+- Added Static Audio Focus Toggle to prevent audio focus loss on some devices
+- Fixing samsung routines and modes
+- Fixing wrong orientation on start if holding the phone wrong. Now uses the orientation from settings
+
+### v.2.3.0
 - Added some new buttons for keymap
 - Fixed 3 Fatal errors
 - Fixed video decoder settings for allwinner devices
@@ -89,6 +94,8 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 - Moved Mic settings to own fragment and added 3 new options for the new mic enhancement from version 2.2.2, which defaults to off for better compatibility
 - Merged PR #481 - Apply MediaTek 60fps and audio optimizations, thanks to @mrkontrast-coder
 - Some rewrite of the AudioTrackWrapper, to enhance stability and minimize stutters
+- Merged PR #490 - Add UI scale settings, thanks to @Anton11111
+- Merged PR #502 - Navigation Broadcast Updates. Thanks to @Bastel2020
 
 ### v.2.2.2
 - Fixed: Exit on disconnect now stops the carmode too

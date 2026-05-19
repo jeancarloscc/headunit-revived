@@ -76,6 +76,16 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("forced_scale", false)
         set(value) { prefs.edit().putBoolean("forced_scale", value).apply() }
 
+    // UI Scale percentage for Home
+    var uiScaleHomePercent: Int
+        get() = prefs.getInt("ui-scale-home-percent", 100)
+        set(value) { prefs.edit().putInt("ui-scale-home-percent", value).apply() }
+
+    // UI Scale percentage for Settings
+    var uiScaleSettingsPercent: Int
+        get() = prefs.getInt("ui-scale-settings-percent", 100)
+        set(value) { prefs.edit().putInt("ui-scale-settings-percent", value).apply() }
+
     var micSampleRate: Int
         get() = prefs.getInt("mic-sample-rate", 16000)
         set(sampleRate) {
@@ -366,6 +376,10 @@ class Settings(private val context: Context) {
     var enableAudioSink: Boolean
         get() = prefs.getBoolean("enable-audio-sink", true)
         set(value) { prefs.edit().putBoolean("enable-audio-sink", value).apply() }
+
+    var staticAudioFocus: Boolean
+        get() = prefs.getBoolean("static-audio-focus", false)
+        set(value) { prefs.edit().putBoolean("static-audio-focus", value).apply() }
 
     var separateAudioStreams: Boolean
         get() = prefs.getBoolean("separate-audio-streams", false)
