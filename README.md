@@ -69,6 +69,7 @@ adb shell am start -a android.intent.action.VIEW -d "headunit://connect?ip=192.1
 ## Changelog
 ### v.2.3.1-alpha
 - Fixed a connection lost on for example borders
+- Binding socket to wifi network if available to prevent connection drops on carrier lost
 - Added Static Audio Focus Toggle to prevent audio focus loss on some devices
 - Fixing samsung routines and modes
 - Fixing wrong orientation on start if holding the phone wrong. Now uses the orientation from settings
