@@ -1,5 +1,5 @@
 # Changelog
-### v.2.3.1-alpha
+### v.2.3.1
 - Fixed a connection lost on for example borders
 - Binding socket to wifi network if available to prevent connection drops on carrier lost
 - Added Static Audio Focus Toggle to prevent audio focus loss on some devices
