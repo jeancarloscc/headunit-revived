@@ -10,6 +10,14 @@ class NightMode(private val settings: Settings, val hasGPSLocation: Boolean) {
     var currentLux: Float = -1f
     var currentBrightness: Int = -1
 
+    /**
+     * Pure sunrise/sunset night state, independent of [Settings.nightMode].
+     * Use when a feature needs the astronomical day/night decision without being
+     * affected by the user's Android Auto night-mode selection.
+     */
+    val isSunriseSunsetNight: Boolean
+        get() = calculator.current
+
     var current: Boolean = false
         get()  {
             return when (settings.nightMode){

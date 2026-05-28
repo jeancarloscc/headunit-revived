@@ -711,12 +711,13 @@ class DarkModeFragment : Fragment(), SensorEventListener {
     override fun onPause() {
         super.onPause()
         sensorManager?.unregisterListener(this)
-        try { requireContext().contentResolver.unregisterContentObserver(brightnessObserver) } catch (_: Exception) {}
+        try { context?.contentResolver?.unregisterContentObserver(brightnessObserver) } catch (_: Exception) {}
         refreshHandler.removeCallbacks(refreshRunnable)
     }
 
     private fun readBrightness(): Int {
-        val cr = requireContext().contentResolver
+        val ctx = context ?: return -1
+        val cr = ctx.contentResolver
         if (Build.VERSION.SDK_INT >= 28) {
             try {
                 val f = SystemSettings.System.getFloat(cr, "screen_brightness_float")

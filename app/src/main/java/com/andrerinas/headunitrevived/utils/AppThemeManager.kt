@@ -204,7 +204,9 @@ class AppThemeManager(
             }
             Settings.AppTheme.AUTO_SUNRISE -> {
                 nightModeCalculator = NightMode(settings, true)
-                isNight = nightModeCalculator.current
+                // Decoupled from settings.nightMode so the app theme can use sunrise/sunset
+                // even when the Android Auto night-mode is set to DAY/NIGHT/CAR_SIGNAL/etc.
+                isNight = nightModeCalculator.isSunriseSunsetNight
                 AppLog.d("AppThemeManager: AUTO_SUNRISE isNight=$isNight")
             }
             Settings.AppTheme.MANUAL_TIME -> {
