@@ -15,7 +15,7 @@ class Settings(context: Context) {
 
     private val _prefs: SharedPreferences? by lazy {
         try {
-            context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         } catch (e: Exception) {
             null
         }
@@ -580,6 +580,8 @@ class Settings(context: Context) {
         }
 
     companion object {
+        const val PREFS_NAME = "settings"
+
         const val CONNECTION_TYPE_WIFI = "wifi"
         const val CONNECTION_TYPE_USB = "usb"
         const val CONNECTION_TYPE_NEARBY = "nearby"
@@ -615,7 +617,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_BOOT, false)
         }
@@ -646,7 +648,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_SCREEN_ON, false)
         }
@@ -677,7 +679,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_USB, false)
         }
@@ -700,7 +702,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_AUTO_START_ON_WIFI, false)
         }
@@ -720,7 +722,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getString(KEY_AUTO_START_WIFI_SSID, "") ?: ""
         }
@@ -740,7 +742,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getBoolean(KEY_LISTEN_FOR_USB_DEVICES, true) // Default is TRUE
         }
@@ -782,7 +784,7 @@ class Settings(context: Context) {
                 val deviceContext = context.createDeviceProtectedStorageContext()
                 deviceContext.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             } else {
-                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             }
             return prefs.getString(KEY_AUTO_START_BT_MAC, "") ?: ""
         }
