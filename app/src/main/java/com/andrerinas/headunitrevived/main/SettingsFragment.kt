@@ -2,6 +2,7 @@ package com.andrerinas.headunitrevived.main
 
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -1558,21 +1559,22 @@ class SettingsFragment : Fragment() {
                 handleResetSettings(snapshot, result)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Toast.makeText(requireContext(), getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+                Toast.makeText(appContext, appContext.getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun handleResetSettings(snapshot: ImportSnapshot, result: SettingsBackupManager.ResetResult) {
-        settings = App.provide(requireContext()).settings
-        applyWirelessSideEffects(snapshot)
+        val ctx = context ?: return
+        settings = App.provide(ctx).settings
+        applyWirelessSideEffects(snapshot, ctx)
 
-        if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(requireContext()).commManager.isConnected) {
-            Toast.makeText(requireContext(), getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
-            val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
+        if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(ctx).commManager.isConnected) {
+            Toast.makeText(ctx, ctx.getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
-            ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+            ContextCompat.startForegroundService(ctx, stopServiceIntent)
         }
 
         hasChanges = false
@@ -1581,10 +1583,10 @@ class SettingsFragment : Fragment() {
         updateSaveButtonState()
         updateSettingsList()
 
-        Toast.makeText(requireContext(), R.string.settings_reset, Toast.LENGTH_LONG).show()
+        Toast.makeText(ctx, R.string.settings_reset, Toast.LENGTH_LONG).show()
 
         if (shouldRecreateAfterImport(snapshot)) {
-            requireActivity().recreate()
+            activity?.recreate()
         }
     }
 
@@ -1788,16 +1790,16 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun applyWirelessSideEffects(snapshot: ImportSnapshot) {
+    private fun applyWirelessSideEffects(snapshot: ImportSnapshot, context: Context = requireContext()) {
         if (snapshot.wifiConnectionMode != settings.wifiConnectionMode ||
             snapshot.helperConnectionStrategy != settings.helperConnectionStrategy ||
             snapshot.bluetoothManagerServiceName != settings.bluetoothManagerServiceName) {
-            val intent = Intent(requireContext(), AapService::class.java).apply {
+            val intent = Intent(context, AapService::class.java).apply {
                 val mode = settings.wifiConnectionMode
                 action = if (mode == 1 || mode == 2 || mode == 3)
                     AapService.ACTION_START_WIRELESS else AapService.ACTION_STOP_WIRELESS
             }
-            requireContext().startService(intent)
+            context.startService(intent)
         }
     }
 
