@@ -35,6 +35,11 @@ object SettingsBackupManager {
         val changedKeys: Set<String>
     )
 
+    data class ResetResult(
+        val resetKeys: Int,
+        val changedKeys: Set<String>
+    )
+
     private enum class ValueType {
         BOOLEAN,
         INT,
@@ -247,6 +252,35 @@ object SettingsBackupManager {
         return ImportResult(
             importedKeys = importData.values.size,
             skippedKeys = importData.skippedKeys,
+            changedKeys = changedKeys
+        )
+    }
+
+    fun resetFromContext(context: Context): ResetResult {
+        val prefs = context.getSharedPreferences(Settings.PREFS_NAME, Context.MODE_PRIVATE)
+        val result = resetPreferencesToDefaults(prefs)
+        syncImportedSettings(context)
+        return result
+    }
+
+    fun resetPreferencesToDefaults(prefs: SharedPreferences): ResetResult {
+        val existingPreferences = prefs.all
+        val changedKeys = backupKeys.keys
+            .filter { key -> existingPreferences.containsKey(key) }
+            .toCollection(linkedSetOf())
+
+        if (changedKeys.isEmpty()) {
+            return ResetResult(resetKeys = 0, changedKeys = emptySet())
+        }
+
+        val editor = prefs.edit()
+        changedKeys.forEach { key -> editor.remove(key) }
+        if (!editor.commit()) {
+            throw IllegalStateException("Unable to reset settings")
+        }
+
+        return ResetResult(
+            resetKeys = changedKeys.size,
             changedKeys = changedKeys
         )
     }

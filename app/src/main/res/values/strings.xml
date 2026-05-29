@@ -337,6 +337,11 @@
     <string name="settings_import_failed">Settings import failed: %1$s</string>
     <string name="settings_imported">Settings imported: %1$d applied, %2$d skipped</string>
     <string name="import_settings_discard_pending">Importing a backup will discard your unsaved settings changes. Continue?</string>
+    <string name="reset_settings">Reset settings</string>
+    <string name="reset_settings_confirm_message">This will reset all settings to their default values. Backups and app files will not be deleted. Continue?</string>
+    <string name="reset_settings_discard_pending">Resetting settings will discard your unsaved settings changes. Continue?</string>
+    <string name="settings_reset">Settings reset to defaults</string>
+    <string name="settings_reset_failed">Settings reset failed: %1$s</string>
     <string name="storage_permission_denied_backup">Storage permission denied. Downloads could not be used.</string>
     <string name="no_file_picker_title">No file picker available</string>
     <string name="no_file_picker_message">This device does not have a compatible file picker. You can use Downloads or the app backup folder instead.</string>

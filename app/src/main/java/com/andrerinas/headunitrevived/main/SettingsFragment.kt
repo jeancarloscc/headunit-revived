@@ -50,6 +50,7 @@ class SettingsFragment : Fragment() {
     private lateinit var settingsAdapter: SettingsAdapter
     private lateinit var toolbar: MaterialToolbar
     private var saveButton: MaterialButton? = null
+    private var resetButton: MaterialButton? = null
 
     // Local state to hold changes before saving
     private var pendingUseGps: Boolean? = null
@@ -105,6 +106,7 @@ class SettingsFragment : Fragment() {
     private var requiresRestart = false
     private var hasChanges = false
     private val SAVE_ITEM_ID = 1001
+    private val RESET_ITEM_ID = 1002
     private var pendingStorageAction: (() -> Unit)? = null
 
     private val bluetoothPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -276,9 +278,19 @@ class SettingsFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             handleBackPress()
         }
+
+        val resetItem = toolbar.menu.add(0, RESET_ITEM_ID, 0, getString(R.string.reset_settings))
+        resetItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+        resetItem.setActionView(R.layout.layout_reset_button)
+
+        resetButton = resetItem.actionView?.findViewById(R.id.reset_button_widget)
+        resetButton?.contentDescription = getString(R.string.reset_settings)
+        resetButton?.setOnClickListener {
+            startResetSettings()
+        }
         
         // Add the Save item with custom layout
-        val saveItem = toolbar.menu.add(0, SAVE_ITEM_ID, 0, getString(R.string.save))
+        val saveItem = toolbar.menu.add(0, SAVE_ITEM_ID, 1, getString(R.string.save))
         saveItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
         saveItem.setActionView(R.layout.layout_save_button)
 
@@ -1503,6 +1515,76 @@ class SettingsFragment : Fragment() {
                 .setMessage(getString(R.string.settings_backup_saved_to, file.absolutePath))
                 .setNegativeButton(R.string.close, null)
                 .show()
+        }
+    }
+
+    private fun startResetSettings() {
+        if (hasChanges) {
+            MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                .setTitle(R.string.reset_settings)
+                .setMessage(R.string.reset_settings_discard_pending)
+                .setPositiveButton(R.string.discard) { _, _ ->
+                    hasChanges = false
+                    requiresRestart = false
+                    reloadPendingStateFromSettings()
+                    updateSaveButtonState()
+                    updateSettingsList()
+                    showResetSettingsConfirmation()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        } else {
+            showResetSettingsConfirmation()
+        }
+    }
+
+    private fun showResetSettingsConfirmation() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+            .setTitle(R.string.reset_settings)
+            .setMessage(R.string.reset_settings_confirm_message)
+            .setPositiveButton(R.string.reset) { _, _ -> resetSettingsToDefaults() }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun resetSettingsToDefaults() {
+        val appContext = requireContext().applicationContext
+        val snapshot = createImportSnapshot()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    SettingsBackupManager.resetFromContext(appContext)
+                }
+                handleResetSettings(snapshot, result)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Toast.makeText(requireContext(), getString(R.string.settings_reset_failed, e.localizedMessage ?: ""), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun handleResetSettings(snapshot: ImportSnapshot, result: SettingsBackupManager.ResetResult) {
+        settings = App.provide(requireContext()).settings
+        applyWirelessSideEffects(snapshot)
+
+        if (SettingsBackupManager.requiresProjectionRestart(result.changedKeys) && App.provide(requireContext()).commManager.isConnected) {
+            Toast.makeText(requireContext(), getString(R.string.stopping_service), Toast.LENGTH_SHORT).show()
+            val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
+                action = AapService.ACTION_STOP_SERVICE
+            }
+            ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+        }
+
+        hasChanges = false
+        requiresRestart = false
+        reloadPendingStateFromSettings()
+        updateSaveButtonState()
+        updateSettingsList()
+
+        Toast.makeText(requireContext(), R.string.settings_reset, Toast.LENGTH_LONG).show()
+
+        if (shouldRecreateAfterImport(snapshot)) {
+            requireActivity().recreate()
         }
     }
 
