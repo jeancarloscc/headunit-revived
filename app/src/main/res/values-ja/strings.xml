@@ -543,4 +543,10 @@
     <string name="bluetooth_adapter_label">Bluetooth アダプター</string>
     <string name="bluetooth_adapter_description">ハンドシェイクに使用する Bluetooth アダプター/コントローラーを選択します。デュアル Bluetooth システムで役立ちます。</string>
     <string name="select_bt_adapter">Bluetooth アダプターの選択</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Wireless Helper の設定</string>
+    <string name="share_hotspot_qr_desc">携帯電話自動接続用のQRコードを表示</string>
+    <string name="hotspot_qr_description">Wireless Helper 設定用QRコード</string>
+    <string name="scan_with_wireless_helper">スマートフォンの Wireless Helper にあるQRスキャナーを使用して、このQRコードをスキャンしてください。</string>
+    <string name="share_hotspot_qr_error">アクティブなWi-Fiホットスポットの認証情報を取得できませんでした。ホットスポットがオンになっており、位置情報が有効になっていることを確認してください。</string>
 </resources>

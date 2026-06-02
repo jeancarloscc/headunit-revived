@@ -536,4 +536,10 @@
     <string name="bluetooth_adapter_label">Adapter Bluetooth</string>
     <string name="bluetooth_adapter_description">Wybierz adapter/kontroler Bluetooth do użycia podczas uścisku dłoni (handshake). Przydatne w systemach z podwójnym Bluetooth.</string>
     <string name="select_bt_adapter">Wybierz adapter Bluetooth</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Skonfiguruj Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Pokaż kod QR do automatycznego połączenia telefonu</string>
+    <string name="hotspot_qr_description">Kod QR konfiguracji Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Zeskanuj ten kod QR za pomocą skanera w aplikacji Wireless Helper na telefonie.</string>
+    <string name="share_hotspot_qr_error">Nie udało się pobrać danych uwierzytelniających aktywnego punktu dostępu Wi-Fi. Upewnij się, że punkt dostępu jest włączony, a lokalizacja aktywna.</string>
 </resources>

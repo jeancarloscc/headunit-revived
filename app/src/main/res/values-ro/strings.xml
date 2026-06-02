@@ -536,4 +536,10 @@
     <string name="bluetooth_adapter_label">Adaptor Bluetooth</string>
     <string name="bluetooth_adapter_description">Selectați adaptorul/controlerul Bluetooth de utilizat pentru handshake. Util pentru sistemele cu Bluetooth dual.</string>
     <string name="select_bt_adapter">Selectați adaptorul Bluetooth</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Configurare Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Afișează codul QR pentru conectarea automată a telefonului</string>
+    <string name="hotspot_qr_description">Cod QR de configurare Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Scanează acest cod QR folosind scanerul QR din Wireless Helper pe telefonul tău.</string>
+    <string name="share_hotspot_qr_error">Nu s-au putut prelua acreditările hotspot-ului Wi-Fi activ. Asigură-te că hotspot-ul este pornit și locația este activată.</string>
 </resources>

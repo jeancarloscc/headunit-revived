@@ -117,9 +117,9 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 return
             }
             val gap = SystemClock.elapsedRealtime() - lastFrame
-            if (overlayState == OverlayState.HIDDEN && gap > 10000) {
+            if (overlayState == OverlayState.HIDDEN && gap > 4000) {
                 showReconnectingOverlay()
-            } else if (overlayState == OverlayState.RECONNECTING && gap < 2000) {
+            } else if (overlayState == OverlayState.RECONNECTING && gap < 500) {
                 hideReconnectingOverlay()
             }
             watchdogHandler.postDelayed(this, 2000)

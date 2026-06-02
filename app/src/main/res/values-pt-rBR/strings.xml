@@ -536,4 +536,10 @@
     <string name="bluetooth_adapter_label">Adaptador Bluetooth</string>
     <string name="bluetooth_adapter_description">Selecione o adaptador/controlador Bluetooth a ser usado para a conexão. Útil para sistemas com Bluetooth duplo.</string>
     <string name="select_bt_adapter">Selecionar adaptador Bluetooth</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Configurar Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Mostrar código QR para conexão automática do telefone</string>
+    <string name="hotspot_qr_description">Código QR de configuração do Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Escaneie este código QR usando o scanner QR no Wireless Helper no seu telefone.</string>
+    <string name="share_hotspot_qr_error">Não foi possível recuperar as credenciais do ponto de acesso Wi-Fi ativo. Certifique-se de que o ponto de acesso está ativado e a localização habilitada.</string>
 </resources>

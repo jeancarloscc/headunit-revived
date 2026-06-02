@@ -510,4 +510,10 @@
     <string name="bluetooth_adapter_label">Bluetooth Adaptörü</string>
     <string name="bluetooth_adapter_description">Bağlantı kurulumu (handshake) için kullanılacak Bluetooth adaptörünü/denetleyicisini seçin. Çift Bluetooth sistemleri için kullanışlıdır.</string>
     <string name="select_bt_adapter">Bluetooth Adaptörünü Seçin</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Wireless Helper\'ı Yapılandır</string>
+    <string name="share_hotspot_qr_desc">Telefon otomatik bağlantısı için QR Kodunu göster</string>
+    <string name="hotspot_qr_description">Wireless Helper Yapılandırma QR Kodu</string>
+    <string name="scan_with_wireless_helper">Bu QR Kodunu telefonunuzdaki Wireless Helper\'da bulunan QR Tarayıcıyı kullanarak tarayın.</string>
+    <string name="share_hotspot_qr_error">Etkin Wi-Fi erişim noktası kimlik bilgileri alınamadı. Lütfen erişim noktanızın açık olduğundan ve Konumun etkinleştirildiğinden emin olun.</string>
 </resources>

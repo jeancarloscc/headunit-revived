@@ -135,6 +135,17 @@ class AapTransport(
         aapVideo = AapVideo(videoDecoder, settings) {
             send(com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
         }
+
+        // Send ACK only when frame is actually rendered to establish backpressure
+        videoDecoder.onFrameRendered = {
+            sendMediaAck(Channel.ID_VID)
+        }
+
+        // Request a keyframe if the decoder stalls or encounters an error
+        videoDecoder.onDecoderError = {
+            AppLog.w("AapTransport: Decoder stall/error! Requesting recovery keyframe.")
+            send(com.andrerinas.headunitrevived.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+        }
     }
 
     internal fun startSensor(type: Int) {

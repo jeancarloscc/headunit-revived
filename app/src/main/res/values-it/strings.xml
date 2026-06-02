@@ -542,4 +542,10 @@
     <string name="bluetooth_adapter_label">Adattatore Bluetooth</string>
     <string name="bluetooth_adapter_description">Seleziona l\'adattatore/controller Bluetooth da utilizzare per l\'handshake. Utile per i sistemi con doppio Bluetooth.</string>
     <string name="select_bt_adapter">Seleziona adattatore Bluetooth</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Configura Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Mostra il codice QR per la connessione automatica del telefono</string>
+    <string name="hotspot_qr_description">Codice QR di configurazione di Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Scansiona questo codice QR usando lo scanner QR in Wireless Helper sul tuo telefono.</string>
+    <string name="share_hotspot_qr_error">Impossibile recuperare le credenziali dell\'hotspot Wi-Fi attivo. Assicurati che l\'hotspot sia attivo e che la geolocalizzazione sia abilitata.</string>
 </resources>

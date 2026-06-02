@@ -11,6 +11,8 @@ import com.andrerinas.headunitrevived.utils.HeadUnitScreenConfig
 import android.os.SystemClock
 import java.nio.ByteBuffer
 import java.util.Locale
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeUnit
 
 interface VideoDimensionsListener {
     fun onVideoDimensionsChanged(width: Int, height: Int)
@@ -23,6 +25,7 @@ interface VideoDimensionsListener {
 class VideoDecoder(private val settings: Settings) {
     companion object {
         private const val TIMEOUT_US = 10000L
+        private const val STALL_TIMEOUT_MS = 3000L
 
         /**
          * Checks if H.265 (HEVC) hardware decoding is supported on the current device.
@@ -107,6 +110,67 @@ class VideoDecoder(private val settings: Settings) {
     @Volatile var onFirstFrameListener: (() -> Unit)? = null
     @Volatile var lastFrameRenderedMs: Long = 0L
 
+    // Async mode (API 21+) fields
+    private val inputBufferQueue = ArrayBlockingQueue<Int>(64)
+    @Volatile private var decoderNeedsRestart = false
+    private var decoderRestartReason: String? = null
+
+    // Callbacks for transport layer integration
+    var onFrameRendered: (() -> Unit)? = null
+    var onDecoderError: (() -> Unit)? = null
+
+    /**
+     * Asynchronous MediaCodec callback for API 21+.
+     * Eliminates the need for an output polling thread and provides
+     * immediate error detection via onError — matching HUR's architecture.
+     */
+    @android.annotation.TargetApi(21)
+    private inner class AsyncCodecCallback : MediaCodec.Callback() {
+        override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
+            if (running) inputBufferQueue.offer(index)
+        }
+
+        override fun onOutputBufferAvailable(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo) {
+            try {
+                codec.releaseOutputBuffer(index, true)
+                lastFrameRenderedMs = SystemClock.elapsedRealtime()
+                onFirstFrameListener?.let { it(); onFirstFrameListener = null }
+
+                frameCount++
+                val now = System.currentTimeMillis()
+                val elapsed = now - lastFpsLogTime
+                if (elapsed >= 1000) {
+                    if (lastFpsLogTime != 0L) {
+                        val fps = (frameCount * 1000 / elapsed).toInt()
+                        onFpsChanged?.invoke(fps)
+                    }
+                    frameCount = 0
+                    lastFpsLogTime = now
+                }
+
+                onFrameRendered?.invoke()
+            } catch (e: IllegalStateException) {
+                AppLog.w("Async: releaseOutputBuffer error: ${e.message}")
+                scheduleRestart("async_render_error")
+            }
+        }
+
+        override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+            AppLog.e("Async: MediaCodec.onError! Restarting decoder.", e)
+            scheduleRestart("async_codec_error")
+            onDecoderError?.invoke()
+        }
+
+        override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+            handleOutputFormatChange(format)
+        }
+    }
+
+    private fun scheduleRestart(reason: String) {
+        decoderRestartReason = reason
+        decoderNeedsRestart = true
+    }
+
     val videoWidth: Int get() = mWidth
     val videoHeight: Int get() = mHeight
 
@@ -155,6 +219,8 @@ class VideoDecoder(private val settings: Settings) {
     fun stop(reason: String = "unknown") {
         synchronized(this) {
             running = false
+            inputBufferQueue.clear()
+            decoderNeedsRestart = false
             try {
                 // If calling from output thread, don't join itself to avoid deadlock
                 if (outputThread != null && outputThread != Thread.currentThread()) {
@@ -173,6 +239,7 @@ class VideoDecoder(private val settings: Settings) {
                 AppLog.e("Error releasing decoder", e)
             }
             
+            inputBufferQueue.clear()
             codec = null
             inputBuffers = null
             legacyFrameBuffer = null
@@ -189,6 +256,14 @@ class VideoDecoder(private val settings: Settings) {
      */
     fun decode(buffer: ByteArray, offset: Int, size: Int, forceSoftware: Boolean, codecName: String) {
         synchronized(this) {
+            // Check if async callback requested a restart
+            if (decoderNeedsRestart) {
+                AppLog.w("Decoder restart requested: $decoderRestartReason")
+                stop("restart: $decoderRestartReason")
+                decoderNeedsRestart = false
+                decoderRestartReason = null
+            }
+
             // Buffer management for backward compatibility
             // Modern devices (API 21+) use the original buffer with offset/size to avoid GC pressure.
             val frameData: ByteArray
@@ -417,21 +492,28 @@ class VideoDecoder(private val settings: Settings) {
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             }
 
-            AppLog.i("Configuring decoder: $bestCodec for ${width}x${height}")
+            // Set async callback for API 21+ BEFORE configure()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                inputBufferQueue.clear()
+                codec?.setCallback(AsyncCodecCallback())
+            }
+
+            AppLog.i("Configuring decoder: $bestCodec for ${width}x${height} (async=${Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP})")
             codec?.configure(format, mSurface, null, 0)
             try { codec?.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT) } catch (e: Exception) {}
             codec?.start()
-            
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                @Suppress("DEPRECATION") inputBuffers = codec?.inputBuffers
-            }
-
             running = true
-            outputThread = Thread {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DISPLAY)
-                com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority()
-                outputThreadLoop()
-            }.apply { name = "VideoDecoder-Output"; start() }
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                // Sync mode: legacy input buffers + output polling thread
+                @Suppress("DEPRECATION") inputBuffers = codec?.inputBuffers
+                outputThread = Thread {
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DISPLAY)
+                    com.andrerinas.headunitrevived.utils.LegacyOptimizer.setHighPriority()
+                    outputThreadLoop()
+                }.apply { name = "VideoDecoder-Output"; start() }
+            }
+            // API 21+: Async callbacks handle output — no polling thread needed
             
             AppLog.i("Codec initialized: $bestCodec")
         } catch (e: Exception) {
@@ -483,16 +565,24 @@ class VideoDecoder(private val settings: Settings) {
     private fun feedInputBuffer(buffer: ByteBuffer): Boolean {
         val currentCodec = codec ?: return false
         try {
-            var inputIndex = -1
-            var attempts = 0
-            while (attempts < 30) {
-                inputIndex = currentCodec.dequeueInputBuffer(TIMEOUT_US)
-                if (inputIndex >= 0) break
-                attempts++
+            val inputIndex: Int
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // Async mode: take index from callback queue
+                inputIndex = inputBufferQueue.poll(100, TimeUnit.MILLISECONDS) ?: -1
+            } else {
+                // Sync mode: dequeue directly
+                var idx = -1
+                var attempts = 0
+                while (attempts < 30) {
+                    idx = currentCodec.dequeueInputBuffer(TIMEOUT_US)
+                    if (idx >= 0) break
+                    attempts++
+                }
+                inputIndex = idx
             }
 
             if (inputIndex < 0) {
-                AppLog.e("Input buffer feed failed (full)")
+                AppLog.e("Input buffer feed failed (no buffer available)")
                 return false
             }
 
@@ -537,9 +627,14 @@ class VideoDecoder(private val settings: Settings) {
 
     /**
      * Dedicated thread to pull decoded frames and render them to the surface.
+     * Used only in synchronous mode (API < 21). Includes stall detection
+     * and consecutive error tracking for automatic recovery.
      */
     private fun outputThreadLoop() {
-        AppLog.i("Output thread started")
+        AppLog.i("Output thread started (sync mode)")
+        var consecutiveErrors = 0
+        var lastOutputMs = 0L
+
         while (running) {
             val currentCodec = codec
             val bufferInfo = codecBufferInfo
@@ -553,7 +648,10 @@ class VideoDecoder(private val settings: Settings) {
                 if (outputIndex >= 0) {
                     currentCodec.releaseOutputBuffer(outputIndex, true)
                     lastFrameRenderedMs = SystemClock.elapsedRealtime()
+                    lastOutputMs = lastFrameRenderedMs
+                    consecutiveErrors = 0
                     onFirstFrameListener?.let { it(); onFirstFrameListener = null }
+                    onFrameRendered?.invoke()
 
                     frameCount++
                     val now = System.currentTimeMillis()
@@ -569,9 +667,28 @@ class VideoDecoder(private val settings: Settings) {
                 } else if (outputIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     handleOutputFormatChange(currentCodec.outputFormat)
                 }
+
+                // Stall detection: if we rendered at least one frame but haven't
+                // produced output in STALL_TIMEOUT_MS, the decoder is likely dead-but-active.
+                if (lastOutputMs > 0) {
+                    val stallGap = SystemClock.elapsedRealtime() - lastOutputMs
+                    if (stallGap > STALL_TIMEOUT_MS) {
+                        AppLog.w("Sync: Decoder stall! No output for ${stallGap}ms. Restarting.")
+                        scheduleRestart("sync_stall")
+                        onDecoderError?.invoke()
+                        break
+                    }
+                }
             } catch (e: Exception) {
                 if (running) {
-                    AppLog.w("Codec exception in output thread: ${e.message}")
+                    consecutiveErrors++
+                    AppLog.w("Sync: Codec exception #$consecutiveErrors: ${e.message}")
+                    if (consecutiveErrors >= 3) {
+                        AppLog.e("Sync: Too many consecutive errors. Restarting decoder.")
+                        scheduleRestart("sync_consecutive_errors")
+                        onDecoderError?.invoke()
+                        break
+                    }
                     try { Thread.sleep(50) } catch (ignore: Exception) {}
                 }
             }

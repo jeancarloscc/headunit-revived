@@ -535,4 +535,10 @@
     <string name="bluetooth_adapter_label">Bluetooth-adapter</string>
     <string name="bluetooth_adapter_description">Selecteer de Bluetooth-adapter/-controller die moet worden gebruikt voor de handshake. Handig voor systemen met dubbele Bluetooth.</string>
     <string name="select_bt_adapter">Selecteer Bluetooth-adapter</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Wireless Helper configureren</string>
+    <string name="share_hotspot_qr_desc">QR-code tonen voor automatische telefoonverbinding</string>
+    <string name="hotspot_qr_description">Configuratie QR-code voor Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Scan deze QR-code met de QR-scanner in Wireless Helper op uw telefoon.</string>
+    <string name="share_hotspot_qr_error">Kon inloggegevens van actieve Wi-Fi-hotspot niet ophalen. Zorg ervoor dat uw hotspot is ingeschakeld en locatie is geactiveerd.</string>
 </resources>

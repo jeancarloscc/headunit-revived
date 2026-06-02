@@ -535,4 +535,10 @@
     <string name="bluetooth_adapter_label">藍牙適配器</string>
     <string name="bluetooth_adapter_description">選擇用於交握的藍牙適配器/控制器。適用於雙藍牙系統。</string>
     <string name="select_bt_adapter">選擇藍牙適配器</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">設定 Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">顯示用於手機自動連線的 QR Code</string>
+    <string name="hotspot_qr_description">Wireless Helper 設定 QR Code</string>
+    <string name="scan_with_wireless_helper">請使用您手機上 Wireless Helper 的 QR 碼掃描器掃描此 QR Code。</string>
+    <string name="share_hotspot_qr_error">無法取得作用中的 Wi-Fi 熱點憑證。請確保您的熱點已開啟且已啟用定位服務。</string>
 </resources>

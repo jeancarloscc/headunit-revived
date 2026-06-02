@@ -534,4 +534,10 @@
     <string name="bluetooth_adapter_label">Bluetooth adapter</string>
     <string name="bluetooth_adapter_description">Válassza ki a kézfogáshoz használandó Bluetooth adaptert/vezérlőt. Kettős Bluetooth-rendszerek esetén hasznos.</string>
     <string name="select_bt_adapter">Bluetooth adapter kiválasztása</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Wireless Helper konfigurálása</string>
+    <string name="share_hotspot_qr_desc">QR-kód megjelenítése a telefon automatikus csatlakozásához</string>
+    <string name="hotspot_qr_description">Wireless Helper konfigurációs QR-kód</string>
+    <string name="scan_with_wireless_helper">Szkenneld be ezt a QR-kódot a telefonodon lévő Wireless Helper QR-szkennerével.</string>
+    <string name="share_hotspot_qr_error">Nem sikerült lekérni az aktív Wi-Fi hotspot adatait. Győződj meg róla, hogy a hotspot be van kapcsolva, és a helyszolgáltatás engedélyezett.</string>
 </resources>

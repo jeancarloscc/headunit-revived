@@ -515,4 +515,10 @@
     <string name="bluetooth_adapter_label">Bộ điều hợp Bluetooth</string>
     <string name="bluetooth_adapter_description">Chọn bộ điều hợp/bộ điều khiển Bluetooth dùng để bắt tay. Hữu ích cho hệ thống Bluetooth kép.</string>
     <string name="select_bt_adapter">Chọn bộ điều hợp Bluetooth</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Cấu hình Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Hiển thị mã QR để tự động kết nối điện thoại</string>
+    <string name="hotspot_qr_description">Mã QR cấu hình Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Quét mã QR này bằng Trình quét QR trong Wireless Helper trên điện thoại của bạn.</string>
+    <string name="share_hotspot_qr_error">Không thể truy xuất thông tin đăng nhập của điểm phát sóng Wi-Fi đang hoạt động. Vui lòng đảm bảo rằng điểm phát sóng của bạn đã được bật và dịch vụ Định vị đã được kích hoạt.</string>
 </resources>

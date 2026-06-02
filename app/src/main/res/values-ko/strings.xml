@@ -516,4 +516,10 @@
     <string name="bluetooth_adapter_label">Bluetooth 어댑터</string>
     <string name="bluetooth_adapter_description">핸드셰이크에 사용할 Bluetooth 어댑터/컨트롤러를 선택합니다. 듀얼 Bluetooth 시스템에서 유용합니다.</string>
     <string name="select_bt_adapter">Bluetooth 어댑터 선택</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">Wireless Helper 구성</string>
+    <string name="share_hotspot_qr_desc">휴대전화 자동 연결을 위한 QR 코드 표시</string>
+    <string name="hotspot_qr_description">Wireless Helper 구성 QR 코드</string>
+    <string name="scan_with_wireless_helper">휴대전화의 Wireless Helper에 있는 QR 스캐너를 사용하여 이 QR 코드를 스캔하세요.</string>
+    <string name="share_hotspot_qr_error">활성 Wi-Fi 핫스팟 자격 증명을 가져올 수 없습니다. 핫스팟이 켜져 있고 위치 서비스가 활성화되어 있는지 확인하세요.</string>
 </resources>

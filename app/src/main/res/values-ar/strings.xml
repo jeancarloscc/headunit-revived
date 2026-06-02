@@ -535,4 +535,10 @@
     <string name="bluetooth_adapter_label">محول البلوتوث</string>
     <string name="bluetooth_adapter_description">اختر محول/وحدة تحكم البلوتوث لاستخدامها في المصافحة. مفيد للأنظمة التي تحتوي على منفذي بلوتوث.</string>
     <string name="select_bt_adapter">حدد محول البلوتوث</string>
+    <!-- QR Code Generator -->
+    <string name="share_hotspot_qr_title">إعداد Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">عرض رمز QR للاتصال التلقائي بالهاتف</string>
+    <string name="hotspot_qr_description">رمز QR لتكوين Wireless Helper</string>
+    <string name="scan_with_wireless_helper">امسح رمز QR هذا باستخدام ماسح QR في Wireless Helper على هاتفك.</string>
+    <string name="share_hotspot_qr_error">تعذر استرداد بيانات اعتماد نقطة اتصال Wi-Fi النشطة. يرجى التأكد من تشغيل نقطة الاتصال وتمكين الموقع.</string>
 </resources>
