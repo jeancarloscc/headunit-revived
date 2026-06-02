@@ -19,7 +19,7 @@ interface VideoDimensionsListener {
 }
 
 /**
- * Main video decoding engine. 
+ * Main video decoding engine.
  * Handles H.264/H.265 streams via MediaCodec.
  */
 class VideoDecoder(private val settings: Settings) {
@@ -89,7 +89,7 @@ class VideoDecoder(private val settings: Settings) {
     private var outputThread: Thread? = null
     @Volatile private var running = false
     private var startTime = 0L
-    
+
     private var mWidth = 0
     private var mHeight = 0
     private var vps: ByteArray? = null
@@ -122,7 +122,7 @@ class VideoDecoder(private val settings: Settings) {
     /**
      * Asynchronous MediaCodec callback for API 21+.
      * Eliminates the need for an output polling thread and provides
-     * immediate error detection via onError — matching HUR's architecture.
+     * immediate error detection via onError
      */
     @android.annotation.TargetApi(21)
     private inner class AsyncCodecCallback : MediaCodec.Callback() {
@@ -203,7 +203,7 @@ class VideoDecoder(private val settings: Settings) {
     fun setSurface(surface: Surface?) {
         synchronized(this) {
             if (mSurface === surface) return
-            
+
             AppLog.i("New surface set: $surface")
             if (codec != null) {
                 stop("New surface")
@@ -229,7 +229,7 @@ class VideoDecoder(private val settings: Settings) {
                 }
             } catch (e: Exception) {}
             outputThread = null
-            
+
             try {
                 codec?.stop()
             } catch (e: Exception) {}
@@ -238,7 +238,7 @@ class VideoDecoder(private val settings: Settings) {
             } catch (e: Exception) {
                 AppLog.e("Error releasing decoder", e)
             }
-            
+
             inputBufferQueue.clear()
             codec = null
             inputBuffers = null
@@ -279,7 +279,7 @@ class VideoDecoder(private val settings: Settings) {
                 frameData = buffer
                 frameOffset = offset
             }
-            
+
             // Initialization phase: detect codec and configuration (SPS/PPS)
             if (codec == null) {
                 val detectedType = detectCodecType(frameData, frameOffset, size)
@@ -288,7 +288,7 @@ class VideoDecoder(private val settings: Settings) {
 
                 if (!codecConfigured) {
                     scanAndApplyConfig(frameData, frameOffset, size, typeToUse)
-                    
+
                     if (mWidth == 0) {
                          // Fallback dimensions if SPS/PPS parsing fails or is missing
                          val negotiatedW = HeadUnitScreenConfig.getNegotiatedWidth()
@@ -303,8 +303,8 @@ class VideoDecoder(private val settings: Settings) {
                 }
 
                 if (mSurface == null || !mSurface!!.isValid) return
-                if (mWidth == 0 || mHeight == 0) return 
-                
+                if (mWidth == 0 || mHeight == 0) return
+
                 start(typeToUse.mimeType, settings.forceSoftwareDecoding || forceSoftware, mWidth, mHeight)
             }
 
@@ -336,7 +336,7 @@ class VideoDecoder(private val settings: Settings) {
                 val b = buffer[headerPos].toInt()
                 val avcType = b and 0x1F
                 if (avcType == 7 || avcType == 8) return CodecType.H264
-                
+
                 val hevcType = (b and 0x7E) shr 1
                 if (hevcType in 32..34 && isHevcSupported()) return CodecType.H265
             }
@@ -352,11 +352,11 @@ class VideoDecoder(private val settings: Settings) {
     private fun forEachNalUnit(buffer: ByteArray, offset: Int, size: Int, callback: (ByteArray, Int) -> Unit) {
         var currentPos = offset
         val limit = offset + size
-        
+
         while (currentPos < limit - 3) {
             var nalStart = -1
             var startCodeLen = 0
-            
+
             for (i in currentPos until limit - 3) {
                 if (buffer[i].toInt() == 0 && buffer[i+1].toInt() == 0) {
                     if (buffer[i+2].toInt() == 0 && buffer[i+3].toInt() == 1) {
@@ -366,16 +366,16 @@ class VideoDecoder(private val settings: Settings) {
                     }
                 }
             }
-            
+
             if (nalStart != -1) {
                 var nalEnd = limit
                 for (j in (nalStart + startCodeLen) until limit - 3) {
-                    if (buffer[j].toInt() == 0 && buffer[j+1].toInt() == 0 && 
+                    if (buffer[j].toInt() == 0 && buffer[j+1].toInt() == 0 &&
                         (buffer[j+2].toInt() == 1 || (buffer[j+2].toInt() == 0 && buffer[j+3].toInt() == 1))) {
                         nalEnd = j; break
                     }
                 }
-                
+
                 val rawNal = buffer.copyOfRange(nalStart, nalEnd)
                 val fixedNal = if (startCodeLen == 3) {
                     // Normalize to 4-byte start codes for better decoder compatibility
@@ -383,7 +383,7 @@ class VideoDecoder(private val settings: Settings) {
                         this[0] = 0; System.arraycopy(rawNal, 0, this, 1, rawNal.size)
                     }
                 } else rawNal
-                
+
                 callback(fixedNal, if (startCodeLen == 3) 4 else 4)
                 currentPos = nalEnd
             } else break
@@ -411,7 +411,7 @@ class VideoDecoder(private val settings: Settings) {
                         }
                     } catch (e: Exception) { AppLog.e("Failed to parse SPS data", e) }
                 } else if (nalType == 8) pps = nalData // PPS
-                
+
                 // H.264 requires at least SPS to start
                 if (sps != null) codecConfigured = true
             } else {
@@ -419,7 +419,7 @@ class VideoDecoder(private val settings: Settings) {
                 if (nalType == 32) vps = nalData
                 else if (nalType == 33) sps = nalData
                 else if (nalType == 34) pps = nalData
-                
+
                 // H.265 requires VPS and SPS to start reliably
                 if (vps != null && sps != null) codecConfigured = true
             }
@@ -440,14 +440,14 @@ class VideoDecoder(private val settings: Settings) {
             codecBufferInfo = MediaCodec.BufferInfo()
 
             val format = MediaFormat.createVideoFormat(mimeType, width, height)
-            
+
             // Apply Codec Specific Data (CSD) from parsed SPS/PPS/VPS
             if (mimeType == CodecType.H265.mimeType) {
                 val combined = (vps ?: byteArrayOf()) + (sps ?: byteArrayOf()) + (pps ?: byteArrayOf())
                 if (combined.isNotEmpty()) {
                     format.setByteBuffer("csd-0", ByteBuffer.wrap(combined))
                 }
-                // [BUG_FIX] Dynamic buffer size based on resolution. 
+                // [BUG_FIX] Dynamic buffer size based on resolution.
                 // 8MB is too large for many older 1080p decoders (Allwinner/Rockchip),
                 // but we need it for 4K.
                 val maxInputSize = if (width * height > 1920 * 1080) {
@@ -459,7 +459,7 @@ class VideoDecoder(private val settings: Settings) {
             } else {
                 if (sps != null) format.setByteBuffer("csd-0", ByteBuffer.wrap(sps!!))
                 if (pps != null) format.setByteBuffer("csd-1", ByteBuffer.wrap(pps!!))
-                
+
                 // [BUG_FIX] Lower buffer for legacy devices (Android < 9) to prevent startup stalls
                 val maxInputSize = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
                     1 * 1024 * 1024 // 1MB for legacy
@@ -477,7 +477,7 @@ class VideoDecoder(private val settings: Settings) {
                 // leading to a SIGABRT in CodecLooper when the surface reconfigures for padding (e.g. 1080->1088).
                 AppLog.i("Decoder: Applying Allwinner stability patches.")
                 format.setInteger("adaptive-playback", 0)
-                
+
                 if (mimeType == CodecType.H265.mimeType) {
                     AppLog.w("CAUTION: Allwinner H.265 is known to be unstable. If the app crashes, please switch to H.264 in settings.")
                     // Force macroblock alignment (multiple of 16) to prevent re-padding crash
@@ -487,7 +487,7 @@ class VideoDecoder(private val settings: Settings) {
                         format.setInteger(MediaFormat.KEY_HEIGHT, alignedHeight)
                     }
                 }
-                
+
                 // Explicitly set color format to surface to help ACodec
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             }
@@ -514,7 +514,7 @@ class VideoDecoder(private val settings: Settings) {
                 }.apply { name = "VideoDecoder-Output"; start() }
             }
             // API 21+: Async callbacks handle output — no polling thread needed
-            
+
             AppLog.i("Codec initialized: $bestCodec")
         } catch (e: Exception) {
             AppLog.e("Failed to start decoder", e)
@@ -549,7 +549,7 @@ class VideoDecoder(private val settings: Settings) {
                 val b = data[headerPos].toInt()
                 if (currentCodecType == CodecType.H265) {
                     val nalType = (b and 0x7E) shr 1
-                    return nalType in 32..34 
+                    return nalType in 32..34
                 } else {
                     val nalType = b and 0x1F
                     return nalType == 7 || nalType == 8
@@ -594,9 +594,9 @@ class VideoDecoder(private val settings: Settings) {
 
             if (inputBuffer == null) return false
             inputBuffer.clear()
-            
+
             val capacity = inputBuffer.capacity()
-            
+
             // Always set BUFFER_FLAG_CODEC_CONFIG for config data (VPS/SPS/PPS).
             // Some decoders (Rockchip/Allwinner) require this flag for every config packet
             // even after the stream has already started.
@@ -614,7 +614,7 @@ class VideoDecoder(private val settings: Settings) {
                 inputBuffer.put(buffer)
                 buffer.limit(limit)
             }
-            
+
             inputBuffer.flip()
             val pts = (System.nanoTime() - startTime) / 1000
             currentCodec.queueInputBuffer(inputIndex, 0, inputBuffer.limit(), pts, flags)
