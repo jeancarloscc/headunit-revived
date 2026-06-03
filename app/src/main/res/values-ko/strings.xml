@@ -516,4 +516,73 @@
     <string name="bluetooth_adapter_label">Bluetooth 어댑터</string>
     <string name="bluetooth_adapter_description">핸드셰이크에 사용할 Bluetooth 어댑터/컨트롤러를 선택합니다. 듀얼 Bluetooth 시스템에서 유용합니다.</string>
     <string name="select_bt_adapter">Bluetooth 어댑터 선택</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">현재 밝기: %d / 255</string>
+    <string name="exit_dialog_settings">빠른 설정</string>
+    <string name="key_back">뒤로</string>
+    <string name="category_backup">백업</string>
+    <string name="export_settings">설정 내보내기</string>
+    <string name="export_settings_description">설정 백업을 JSON 파일로 저장</string>
+    <string name="export_settings_app_folder">앱 백업 폴더에 저장</string>
+    <string name="export_settings_downloads">다운로드에 저장</string>
+    <string name="export_settings_choose_location">저장 위치 선택</string>
+    <string name="settings_exported">설정 내보내기 완료</string>
+    <string name="settings_export_failed">설정 내보내기 실패: %1$s</string>
+    <string name="settings_backup_saved_to">설정 백업이 저장된 위치:\n%1$s</string>
+    <string name="share_settings_backup">설정 백업 공유</string>
+    <string name="import_settings">설정 가져오기</string>
+    <string name="import_settings_description">Headunit Revived 백업에서 설정 복원</string>
+    <string name="import_settings_app_folder">앱 백업 폴더에서 가져오기</string>
+    <string name="import_settings_downloads">다운로드에서 가져오기</string>
+    <string name="import_settings_choose_file">백업 파일 선택</string>
+    <string name="import_settings_discard_pending">백업을 가져오면 저장되지 않은 설정 변경 사항이 삭제됩니다. 계속할까요?</string>
+    <string name="settings_imported">설정 가져오기 완료: %1$d개 적용, %2$d개 건너뜀</string>
+    <string name="settings_import_failed">설정 가져오기 실패: %1$s</string>
+    <string name="no_settings_backups_title">백업을 찾을 수 없음</string>
+    <string name="no_settings_backups_message">앱 백업 폴더에 Headunit Revived 백업이 없습니다. 먼저 백업을 내보낸 후 여기에서 가져오세요.</string>
+    <string name="no_settings_backups_downloads_message">다운로드에 Headunit Revived 백업이 없습니다. 먼저 백업을 다운로드로 내보낸 후 여기에서 가져오세요.</string>
+    <string name="no_file_picker_title">사용 가능한 파일 선택기 없음</string>
+    <string name="no_file_picker_message">이 기기에는 호환되는 파일 선택기가 없습니다. 대신 다운로드 또는 앱 백업 폴더를 사용할 수 있습니다.</string>
+    <string name="storage_permission_denied_backup">저장소 권한이 거부되었습니다. 다운로드를 사용할 수 없습니다.</string>
+    <string name="reset_settings">기본값으로 재설정</string>
+    <string name="reset_settings_description">모든 설정, 캐시 데이터 및 자동 연결 환경설정을 지웁니다. 기본값을 적용하기 위해 앱이 다시 시작됩니다.</string>
+    <string name="reset_settings_confirm">모든 설정을 기본값으로 재설정하시겠습니까? 이 작업은 앱을 다시 시작합니다.</string>
+    <string name="reset_settings_confirm_message">모든 설정이 기본값으로 재설정됩니다. 백업과 앱 파일은 삭제되지 않습니다. 계속할까요?</string>
+    <string name="reset_settings_discard_pending">설정을 재설정하면 저장되지 않은 변경 사항이 삭제됩니다. 계속할까요?</string>
+    <string name="settings_reset">설정이 기본값으로 재설정됨</string>
+    <string name="settings_reset_failed">설정 재설정 실패: %1$s</string>
+    <string name="share_hotspot_qr_title">Wireless Helper 설정</string>
+    <string name="share_hotspot_qr_desc">휴대폰 자동 연결용 QR 코드 표시</string>
+    <string name="hotspot_ssid_hint">핫스팟 SSID</string>
+    <string name="hotspot_pass_hint">핫스팟 비밀번호</string>
+    <string name="hotspot_qr_description">Wireless Helper 설정 QR 코드</string>
+    <string name="scan_with_wireless_helper">휴대폰의 Wireless Helper에서 QR 스캐너로 이 QR 코드를 스캔하세요.</string>
+    <string name="share_hotspot_qr_error">활성화된 Wi-Fi 핫스팟 정보를 가져올 수 없습니다. 핫스팟이 켜져 있고 위치 서비스가 활성화되어 있는지 확인하세요.</string>
+
+    <!-- Loading screen -->
+    <string name="loading_screen">로딩 화면</string>
+    <string name="loading_screen_dialog_title">사용자 지정 로딩 화면</string>
+    <string name="loading_screen_default">기본</string>
+    <string name="loading_screen_custom">사용자 지정</string>
+    <string name="loading_screen_select_file">파일 선택</string>
+    <string name="loading_screen_remove">제거</string>
+    <string name="loading_screen_no_media">선택된 사용자 지정 미디어 없음</string>
+    <string name="loading_screen_tap_preview">탭하여 전체 화면 미리보기</string>
+    <string name="loading_screen_tap_fullscreen_hint">미리보기를 탭하여 전체 화면으로 보기</string>
+    <string name="loading_screen_tap_to_close">아무 곳이나 탭하여 닫기</string>
+    <string name="loading_screen_show_text">\"Android Auto가 시작 중\" 텍스트 표시</string>
+    <string name="loading_screen_keep_aspect_ratio">비율 유지</string>
+    <string name="loading_screen_loop_video">짧은 애니메이션 반복 재생</string>
+    <string name="loading_screen_recommendation">권장 해상도: %1$dx%2$d</string>
+    <string name="loading_screen_recommended_aspect_ratio">권장 종횡비: %1$d:%2$d</string>
+    <string name="loading_screen_supported_formats">지원: 이미지 (PNG, JPG, BMP, WEBP, GIF) \u2022 동영상 (MP4, MKV, WEBM, 3GP) \u2022 최대: 10 MB</string>
+    <string name="loading_screen_file_error">선택한 파일을 불러올 수 없습니다</string>
+    <string name="loading_screen_file_too_large">파일이 너무 큽니다 (최대 10 MB)</string>
+    <string name="loading_screen_unsupported_format">지원되지 않는 형식입니다. 이미지 또는 동영상 파일을 사용하세요</string>
+
+    <!-- Log source -->
+    <string name="log_source">로그 소스</string>
+    <string name="log_source_logcat">Logcat</string>
+    <string name="log_source_applog_file">파일로 직접 저장</string>
 </resources>

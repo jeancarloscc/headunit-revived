@@ -535,4 +535,47 @@
     <string name="bluetooth_adapter_label">藍牙適配器</string>
     <string name="bluetooth_adapter_description">選擇用於交握的藍牙適配器/控制器。適用於雙藍牙系統。</string>
     <string name="select_bt_adapter">選擇藍牙適配器</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">當前亮度：%d / 255</string>
+    <string name="exit_dialog_settings">快速設定</string>
+    <string name="key_back">返回</string>
+    <string name="category_backup">備份</string>
+    <string name="export_settings">匯出設定</string>
+    <string name="export_settings_description">將設定備份儲存為 JSON 檔案</string>
+    <string name="export_settings_app_folder">儲存至應用程式備份資料夾</string>
+    <string name="export_settings_downloads">儲存至下載</string>
+    <string name="export_settings_choose_location">選擇儲存位置</string>
+    <string name="settings_exported">已匯出設定</string>
+    <string name="settings_export_failed">設定匯出失敗：%1$s</string>
+    <string name="settings_backup_saved_to">設定備份已儲存至：\n%1$s</string>
+    <string name="share_settings_backup">分享設定備份</string>
+    <string name="import_settings">匯入設定</string>
+    <string name="import_settings_description">從 Headunit Revived 備份還原設定</string>
+    <string name="import_settings_app_folder">從應用程式備份資料夾匯入</string>
+    <string name="import_settings_downloads">從下載匯入</string>
+    <string name="import_settings_choose_file">選擇備份檔案</string>
+    <string name="import_settings_discard_pending">匯入備份將會放棄未儲存的設定變更。要繼續嗎？</string>
+    <string name="settings_imported">已匯入設定：套用 %1$d 項、略過 %2$d 項</string>
+    <string name="settings_import_failed">設定匯入失敗：%1$s</string>
+    <string name="no_settings_backups_title">找不到備份</string>
+    <string name="no_settings_backups_message">在應用程式備份資料夾中找不到 Headunit Revived 備份。請先匯出一個備份，然後從這裡匯入。</string>
+    <string name="no_settings_backups_downloads_message">在下載中找不到 Headunit Revived 備份。請先將備份匯出到下載，然後從這裡匯入。</string>
+    <string name="no_file_picker_title">沒有可用的檔案選擇器</string>
+    <string name="no_file_picker_message">此裝置沒有相容的檔案選擇器。您可以改用下載或應用程式備份資料夾。</string>
+    <string name="storage_permission_denied_backup">儲存權限被拒絕。無法使用下載資料夾。</string>
+    <string name="reset_settings">重設為預設值</string>
+    <string name="reset_settings_description">清除所有設定、快取資料及自動連線偏好設定。應用程式將重新啟動以套用出廠預設值。</string>
+    <string name="reset_settings_confirm">您確定要將所有設定重設為預設值嗎？這將重新啟動應用程式。</string>
+    <string name="reset_settings_confirm_message">所有設定都會重設為預設值。備份和應用程式檔案不會被刪除。要繼續嗎？</string>
+    <string name="reset_settings_discard_pending">重設設定將會放棄未儲存的變更。要繼續嗎？</string>
+    <string name="settings_reset">設定已重設為預設值</string>
+    <string name="settings_reset_failed">設定重設失敗：%1$s</string>
+    <string name="share_hotspot_qr_title">設定 Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">顯示 QR Code 以便手機自動連線</string>
+    <string name="hotspot_ssid_hint">熱點 SSID</string>
+    <string name="hotspot_pass_hint">熱點密碼</string>
+    <string name="hotspot_qr_description">Wireless Helper 設定 QR Code</string>
+    <string name="scan_with_wireless_helper">請使用手機上 Wireless Helper 中的 QR 掃描器掃描此 QR Code。</string>
+    <string name="share_hotspot_qr_error">無法取得目前 Wi-Fi 熱點的認證資訊。請確認熱點已開啟，且位置資訊已啟用。</string>
 </resources>

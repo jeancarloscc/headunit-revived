@@ -534,4 +534,47 @@
     <string name="bluetooth_adapter_label">Bluetooth adapter</string>
     <string name="bluetooth_adapter_description">Válassza ki a kézfogáshoz használandó Bluetooth adaptert/vezérlőt. Kettős Bluetooth-rendszerek esetén hasznos.</string>
     <string name="select_bt_adapter">Bluetooth adapter kiválasztása</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">Aktuális fényerő: %d / 255</string>
+    <string name="exit_dialog_settings">Gyors beállítások</string>
+    <string name="key_back">Vissza</string>
+    <string name="category_backup">Biztonsági mentés</string>
+    <string name="export_settings">Beállítások exportálása</string>
+    <string name="export_settings_description">Mentse a beállítások biztonsági mentését JSON fájlként</string>
+    <string name="export_settings_app_folder">Mentés az alkalmazás mentési mappájába</string>
+    <string name="export_settings_downloads">Mentés a Letöltésekbe</string>
+    <string name="export_settings_choose_location">Mentési hely kiválasztása</string>
+    <string name="settings_exported">Beállítások exportálva</string>
+    <string name="settings_export_failed">A beállítások exportálása sikertelen: %1$s</string>
+    <string name="settings_backup_saved_to">Biztonsági mentés ide mentve:\n%1$s</string>
+    <string name="share_settings_backup">Biztonsági mentés megosztása</string>
+    <string name="import_settings">Beállítások importálása</string>
+    <string name="import_settings_description">Beállítások visszaállítása egy Headunit Revived mentésből</string>
+    <string name="import_settings_app_folder">Importálás az alkalmazás mentési mappájából</string>
+    <string name="import_settings_downloads">Importálás a Letöltésekből</string>
+    <string name="import_settings_choose_file">Mentési fájl kiválasztása</string>
+    <string name="import_settings_discard_pending">Egy mentés importálása eldobja a nem mentett változtatásokat. Folytatja?</string>
+    <string name="settings_imported">Beállítások importálva: %1$d alkalmazva, %2$d kihagyva</string>
+    <string name="settings_import_failed">A beállítások importálása sikertelen: %1$s</string>
+    <string name="no_settings_backups_title">Nem található mentés</string>
+    <string name="no_settings_backups_message">Az alkalmazás mentési mappájában nem található Headunit Revived mentés. Először exportáljon egy mentést, majd importálja innen.</string>
+    <string name="no_settings_backups_downloads_message">A Letöltések mappában nem található Headunit Revived mentés. Először exportáljon egy mentést a Letöltésekbe, majd importálja innen.</string>
+    <string name="no_file_picker_title">Nem érhető el fájlválasztó</string>
+    <string name="no_file_picker_message">Ezen az eszközön nincs kompatibilis fájlválasztó. Helyette használhatja a Letöltések mappát vagy az alkalmazás mentési mappáját.</string>
+    <string name="storage_permission_denied_backup">Tárhely engedély megtagadva. A Letöltések nem használható.</string>
+    <string name="reset_settings">Alapértékek visszaállítása</string>
+    <string name="reset_settings_description">Törli az összes beállítást, gyorsítótárazott adatot és automatikus csatlakozási beállítást. Az alkalmazás újraindul a gyári beállítások alkalmazásához.</string>
+    <string name="reset_settings_confirm">Biztosan visszaállítja az összes beállítást az alapértékekre? Ezzel újraindul az alkalmazás.</string>
+    <string name="reset_settings_confirm_message">Ezzel minden beállítás visszaáll az alapértékekre. A mentések és alkalmazás fájlok nem törlődnek. Folytatja?</string>
+    <string name="reset_settings_discard_pending">A beállítások visszaállítása eldobja a nem mentett változtatásokat. Folytatja?</string>
+    <string name="settings_reset">Beállítások visszaállítva</string>
+    <string name="settings_reset_failed">A beállítások visszaállítása sikertelen: %1$s</string>
+    <string name="share_hotspot_qr_title">Wireless Helper konfigurálása</string>
+    <string name="share_hotspot_qr_desc">QR kód megjelenítése a telefon automatikus csatlakozásához</string>
+    <string name="hotspot_ssid_hint">Hotspot SSID</string>
+    <string name="hotspot_pass_hint">Hotspot jelszó</string>
+    <string name="hotspot_qr_description">Wireless Helper konfigurációs QR kód</string>
+    <string name="scan_with_wireless_helper">Olvassa be ezt a QR kódot a telefonján a Wireless Helper QR olvasójával.</string>
+    <string name="share_hotspot_qr_error">Nem sikerült lekérni az aktív Wi-Fi hotspot adatait. Győződjön meg róla, hogy a hotspot be van kapcsolva és a Helymeghatározás engedélyezve van.</string>
 </resources>

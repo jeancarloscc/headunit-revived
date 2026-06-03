@@ -535,4 +535,47 @@
     <string name="bluetooth_adapter_label">Bluetooth-adapter</string>
     <string name="bluetooth_adapter_description">Selecteer de Bluetooth-adapter/-controller die moet worden gebruikt voor de handshake. Handig voor systemen met dubbele Bluetooth.</string>
     <string name="select_bt_adapter">Selecteer Bluetooth-adapter</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">Huidige helderheid: %d / 255</string>
+    <string name="exit_dialog_settings">Snelle instellingen</string>
+    <string name="key_back">Terug</string>
+    <string name="category_backup">Back-up</string>
+    <string name="export_settings">Instellingen exporteren</string>
+    <string name="export_settings_description">Sla een back-up van je instellingen op als JSON-bestand</string>
+    <string name="export_settings_app_folder">Opslaan in back-upmap van app</string>
+    <string name="export_settings_downloads">Opslaan in Downloads</string>
+    <string name="export_settings_choose_location">Kies opslaglocatie</string>
+    <string name="settings_exported">Instellingen geëxporteerd</string>
+    <string name="settings_export_failed">Exporteren van instellingen mislukt: %1$s</string>
+    <string name="settings_backup_saved_to">Back-up opgeslagen in:\n%1$s</string>
+    <string name="share_settings_backup">Back-up delen</string>
+    <string name="import_settings">Instellingen importeren</string>
+    <string name="import_settings_description">Herstel instellingen vanuit een Headunit Revived back-up</string>
+    <string name="import_settings_app_folder">Importeren uit back-upmap van app</string>
+    <string name="import_settings_downloads">Importeren uit Downloads</string>
+    <string name="import_settings_choose_file">Back-upbestand kiezen</string>
+    <string name="import_settings_discard_pending">Het importeren van een back-up verwijdert je niet-opgeslagen wijzigingen. Doorgaan?</string>
+    <string name="settings_imported">Instellingen geïmporteerd: %1$d toegepast, %2$d overgeslagen</string>
+    <string name="settings_import_failed">Importeren van instellingen mislukt: %1$s</string>
+    <string name="no_settings_backups_title">Geen back-ups gevonden</string>
+    <string name="no_settings_backups_message">Er zijn geen Headunit Revived back-ups gevonden in de back-upmap van de app. Exporteer eerst een back-up en importeer deze daarna van hier.</string>
+    <string name="no_settings_backups_downloads_message">Er zijn geen Headunit Revived back-ups gevonden in Downloads. Exporteer eerst een back-up naar Downloads en importeer deze daarna van hier.</string>
+    <string name="no_file_picker_title">Geen bestandskiezer beschikbaar</string>
+    <string name="no_file_picker_message">Dit apparaat heeft geen compatibele bestandskiezer. Gebruik in plaats daarvan Downloads of de back-upmap van de app.</string>
+    <string name="storage_permission_denied_backup">Toegang tot opslag geweigerd. Downloads kon niet worden gebruikt.</string>
+    <string name="reset_settings">Herstellen naar standaardwaarden</string>
+    <string name="reset_settings_description">Wist alle configuratie, gegevens uit de cache en automatische verbindingsvoorkeuren. De app wordt opnieuw opgestart om de fabrieksinstellingen toe te passen.</string>
+    <string name="reset_settings_confirm">Weet je zeker dat je alle instellingen wilt terugzetten naar de standaardwaarden? De app wordt opnieuw opgestart.</string>
+    <string name="reset_settings_confirm_message">Hiermee worden alle instellingen teruggezet naar de standaardwaarden. Back-ups en appbestanden worden niet verwijderd. Doorgaan?</string>
+    <string name="reset_settings_discard_pending">Het herstellen van de instellingen verwijdert je niet-opgeslagen wijzigingen. Doorgaan?</string>
+    <string name="settings_reset">Instellingen teruggezet naar standaardwaarden</string>
+    <string name="settings_reset_failed">Herstellen van instellingen mislukt: %1$s</string>
+    <string name="share_hotspot_qr_title">Wireless Helper configureren</string>
+    <string name="share_hotspot_qr_desc">Toon QR-code voor automatische telefoonverbinding</string>
+    <string name="hotspot_ssid_hint">Hotspot-SSID</string>
+    <string name="hotspot_pass_hint">Hotspot-wachtwoord</string>
+    <string name="hotspot_qr_description">QR-code voor configuratie van Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Scan deze QR-code met de QR-scanner in Wireless Helper op je telefoon.</string>
+    <string name="share_hotspot_qr_error">Kon de gegevens van de actieve Wi-Fi-hotspot niet ophalen. Zorg ervoor dat je hotspot is ingeschakeld en dat Locatie is geactiveerd.</string>
 </resources>

@@ -536,4 +536,47 @@
     <string name="bluetooth_adapter_label">Adapter Bluetooth</string>
     <string name="bluetooth_adapter_description">Wybierz adapter/kontroler Bluetooth do użycia podczas uścisku dłoni (handshake). Przydatne w systemach z podwójnym Bluetooth.</string>
     <string name="select_bt_adapter">Wybierz adapter Bluetooth</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">Aktualna jasność: %d / 255</string>
+    <string name="exit_dialog_settings">Szybkie ustawienia</string>
+    <string name="key_back">Wstecz</string>
+    <string name="category_backup">Kopia zapasowa</string>
+    <string name="export_settings">Eksportuj ustawienia</string>
+    <string name="export_settings_description">Zapisz kopię zapasową ustawień jako plik JSON</string>
+    <string name="export_settings_app_folder">Zapisz w folderze kopii zapasowych aplikacji</string>
+    <string name="export_settings_downloads">Zapisz w Pobranych</string>
+    <string name="export_settings_choose_location">Wybierz lokalizację zapisu</string>
+    <string name="settings_exported">Ustawienia wyeksportowane</string>
+    <string name="settings_export_failed">Eksport ustawień nie powiódł się: %1$s</string>
+    <string name="settings_backup_saved_to">Kopia zapasowa zapisana w:\n%1$s</string>
+    <string name="share_settings_backup">Udostępnij kopię zapasową</string>
+    <string name="import_settings">Importuj ustawienia</string>
+    <string name="import_settings_description">Przywróć ustawienia z kopii zapasowej Headunit Revived</string>
+    <string name="import_settings_app_folder">Importuj z folderu kopii zapasowych aplikacji</string>
+    <string name="import_settings_downloads">Importuj z Pobranych</string>
+    <string name="import_settings_choose_file">Wybierz plik kopii zapasowej</string>
+    <string name="import_settings_discard_pending">Import kopii zapasowej spowoduje odrzucenie niezapisanych zmian. Kontynuować?</string>
+    <string name="settings_imported">Ustawienia zaimportowane: %1$d zastosowano, %2$d pominięto</string>
+    <string name="settings_import_failed">Import ustawień nie powiódł się: %1$s</string>
+    <string name="no_settings_backups_title">Brak kopii zapasowych</string>
+    <string name="no_settings_backups_message">Nie znaleziono kopii zapasowych Headunit Revived w folderze kopii zapasowych aplikacji. Najpierw wyeksportuj kopię, a następnie zaimportuj ją stąd.</string>
+    <string name="no_settings_backups_downloads_message">Nie znaleziono kopii zapasowych Headunit Revived w Pobranych. Najpierw wyeksportuj kopię do Pobranych, a następnie zaimportuj ją stąd.</string>
+    <string name="no_file_picker_title">Brak dostępnego selektora plików</string>
+    <string name="no_file_picker_message">To urządzenie nie ma kompatybilnego selektora plików. Możesz użyć Pobranych lub folderu kopii zapasowych aplikacji.</string>
+    <string name="storage_permission_denied_backup">Odmowa dostępu do pamięci. Nie można użyć folderu Pobrane.</string>
+    <string name="reset_settings">Przywróć domyślne</string>
+    <string name="reset_settings_description">Czyści całą konfigurację, dane z pamięci podręcznej i preferencje automatycznego łączenia. Aplikacja zostanie ponownie uruchomiona, aby zastosować ustawienia fabryczne.</string>
+    <string name="reset_settings_confirm">Czy na pewno chcesz przywrócić wszystkie ustawienia do wartości domyślnych? Aplikacja zostanie ponownie uruchomiona.</string>
+    <string name="reset_settings_confirm_message">Wszystkie ustawienia zostaną przywrócone do wartości domyślnych. Kopie zapasowe i pliki aplikacji nie zostaną usunięte. Kontynuować?</string>
+    <string name="reset_settings_discard_pending">Przywrócenie ustawień spowoduje odrzucenie niezapisanych zmian. Kontynuować?</string>
+    <string name="settings_reset">Ustawienia przywrócone do domyślnych</string>
+    <string name="settings_reset_failed">Przywracanie ustawień nie powiodło się: %1$s</string>
+    <string name="share_hotspot_qr_title">Skonfiguruj Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Pokaż kod QR do automatycznego połączenia z telefonem</string>
+    <string name="hotspot_ssid_hint">SSID hotspota</string>
+    <string name="hotspot_pass_hint">Hasło hotspota</string>
+    <string name="hotspot_qr_description">Kod QR konfiguracji Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Zeskanuj ten kod QR za pomocą skanera QR w aplikacji Wireless Helper na telefonie.</string>
+    <string name="share_hotspot_qr_error">Nie udało się pobrać danych aktywnego hotspota Wi-Fi. Upewnij się, że hotspot jest włączony, a Lokalizacja aktywna.</string>
 </resources>

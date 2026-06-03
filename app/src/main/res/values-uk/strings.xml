@@ -536,4 +536,47 @@
     <string name="bluetooth_adapter_label">Bluetooth-адаптер</string>
     <string name="bluetooth_adapter_description">Виберіть Bluetooth-адаптер/контролер для встановлення зв\'язку. Корисно для систем із подвійним Bluetooth.</string>
     <string name="select_bt_adapter">Вибрати Bluetooth-адаптер</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">Поточна яскравість: %d / 255</string>
+    <string name="exit_dialog_settings">Швидкі налаштування</string>
+    <string name="key_back">Назад</string>
+    <string name="category_backup">Резервна копія</string>
+    <string name="export_settings">Експортувати налаштування</string>
+    <string name="export_settings_description">Зберегти резервну копію налаштувань як файл JSON</string>
+    <string name="export_settings_app_folder">Зберегти у папку резервних копій застосунку</string>
+    <string name="export_settings_downloads">Зберегти у Завантаження</string>
+    <string name="export_settings_choose_location">Виберіть місце збереження</string>
+    <string name="settings_exported">Налаштування експортовано</string>
+    <string name="settings_export_failed">Не вдалося експортувати налаштування: %1$s</string>
+    <string name="settings_backup_saved_to">Резервну копію налаштувань збережено у:\n%1$s</string>
+    <string name="share_settings_backup">Поділитися резервною копією</string>
+    <string name="import_settings">Імпортувати налаштування</string>
+    <string name="import_settings_description">Відновити налаштування з резервної копії Headunit Revived</string>
+    <string name="import_settings_app_folder">Імпортувати з папки резервних копій застосунку</string>
+    <string name="import_settings_downloads">Імпортувати із Завантажень</string>
+    <string name="import_settings_choose_file">Виберіть файл резервної копії</string>
+    <string name="import_settings_discard_pending">Імпорт резервної копії скасує незбережені зміни. Продовжити?</string>
+    <string name="settings_imported">Налаштування імпортовано: %1$d застосовано, %2$d пропущено</string>
+    <string name="settings_import_failed">Не вдалося імпортувати налаштування: %1$s</string>
+    <string name="no_settings_backups_title">Резервні копії не знайдено</string>
+    <string name="no_settings_backups_message">У папці резервних копій застосунку не знайдено резервних копій Headunit Revived. Спочатку експортуйте копію, потім імпортуйте її звідси.</string>
+    <string name="no_settings_backups_downloads_message">У Завантаженнях не знайдено резервних копій Headunit Revived. Спочатку експортуйте копію в Завантаження, потім імпортуйте її звідси.</string>
+    <string name="no_file_picker_title">Вибір файлів недоступний</string>
+    <string name="no_file_picker_message">На цьому пристрої немає сумісного засобу вибору файлів. Натомість можна скористатися Завантаженнями або папкою резервних копій застосунку.</string>
+    <string name="storage_permission_denied_backup">У доступі до сховища відмовлено. Не вдалося використати Завантаження.</string>
+    <string name="reset_settings">Скинути до типових</string>
+    <string name="reset_settings_description">Очищає всю конфігурацію, кешовані дані та налаштування автопідключення. Застосунок перезапуститься, щоб застосувати заводські значення.</string>
+    <string name="reset_settings_confirm">Ви впевнені, що хочете скинути всі налаштування до типових значень? Це перезапустить застосунок.</string>
+    <string name="reset_settings_confirm_message">Усі налаштування будуть скинуті до типових значень. Резервні копії та файли застосунку не будуть видалені. Продовжити?</string>
+    <string name="reset_settings_discard_pending">Скидання налаштувань скасує незбережені зміни. Продовжити?</string>
+    <string name="settings_reset">Налаштування скинуто до типових</string>
+    <string name="settings_reset_failed">Не вдалося скинути налаштування: %1$s</string>
+    <string name="share_hotspot_qr_title">Налаштувати Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Показати QR-код для автоматичного підключення телефона</string>
+    <string name="hotspot_ssid_hint">SSID точки доступу</string>
+    <string name="hotspot_pass_hint">Пароль точки доступу</string>
+    <string name="hotspot_qr_description">QR-код налаштування Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Відскануйте цей QR-код за допомогою QR-сканера у Wireless Helper на вашому телефоні.</string>
+    <string name="share_hotspot_qr_error">Не вдалося отримати дані активної точки доступу Wi-Fi. Переконайтеся, що точку доступу увімкнено, а Місцезнаходження активне.</string>
 </resources>

@@ -515,4 +515,73 @@
     <string name="bluetooth_adapter_label">Bộ điều hợp Bluetooth</string>
     <string name="bluetooth_adapter_description">Chọn bộ điều hợp/bộ điều khiển Bluetooth dùng để bắt tay. Hữu ích cho hệ thống Bluetooth kép.</string>
     <string name="select_bt_adapter">Chọn bộ điều hợp Bluetooth</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="exit_dialog_settings">Cài đặt nhanh</string>
+    <string name="key_back">Quay lại</string>
+    <string name="category_backup">Sao lưu</string>
+    <string name="export_settings">Xuất cài đặt</string>
+    <string name="export_settings_description">Lưu bản sao lưu cài đặt dưới dạng tệp JSON</string>
+    <string name="export_settings_app_folder">Lưu vào thư mục sao lưu của ứng dụng</string>
+    <string name="export_settings_downloads">Lưu vào Tải xuống</string>
+    <string name="export_settings_choose_location">Chọn vị trí lưu</string>
+    <string name="settings_exported">Đã xuất cài đặt</string>
+    <string name="settings_export_failed">Xuất cài đặt thất bại: %1$s</string>
+    <string name="settings_backup_saved_to">Bản sao lưu cài đặt đã lưu tại:\n%1$s</string>
+    <string name="share_settings_backup">Chia sẻ bản sao lưu</string>
+    <string name="import_settings">Nhập cài đặt</string>
+    <string name="import_settings_description">Khôi phục cài đặt từ bản sao lưu của Headunit Revived</string>
+    <string name="import_settings_app_folder">Nhập từ thư mục sao lưu của ứng dụng</string>
+    <string name="import_settings_downloads">Nhập từ Tải xuống</string>
+    <string name="import_settings_choose_file">Chọn tệp sao lưu</string>
+    <string name="import_settings_discard_pending">Nhập một bản sao lưu sẽ huỷ các thay đổi chưa lưu. Tiếp tục?</string>
+    <string name="settings_imported">Đã nhập cài đặt: %1$d áp dụng, %2$d bỏ qua</string>
+    <string name="settings_import_failed">Nhập cài đặt thất bại: %1$s</string>
+    <string name="no_settings_backups_title">Không tìm thấy bản sao lưu</string>
+    <string name="no_settings_backups_message">Không tìm thấy bản sao lưu Headunit Revived trong thư mục sao lưu của ứng dụng. Hãy xuất một bản sao lưu trước rồi nhập từ đây.</string>
+    <string name="no_settings_backups_downloads_message">Không tìm thấy bản sao lưu Headunit Revived trong Tải xuống. Hãy xuất một bản sao lưu sang Tải xuống trước rồi nhập từ đây.</string>
+    <string name="no_file_picker_title">Không có trình chọn tệp</string>
+    <string name="no_file_picker_message">Thiết bị này không có trình chọn tệp tương thích. Bạn có thể dùng Tải xuống hoặc thư mục sao lưu của ứng dụng thay thế.</string>
+    <string name="storage_permission_denied_backup">Quyền truy cập bộ nhớ bị từ chối. Không thể sử dụng Tải xuống.</string>
+    <string name="reset_settings">Khôi phục mặc định</string>
+    <string name="reset_settings_description">Xoá toàn bộ cấu hình, dữ liệu cache và tuỳ chọn tự động kết nối. Ứng dụng sẽ khởi động lại để áp dụng cài đặt gốc.</string>
+    <string name="reset_settings_confirm">Bạn có chắc muốn đặt lại tất cả cài đặt về giá trị mặc định? Ứng dụng sẽ khởi động lại.</string>
+    <string name="reset_settings_confirm_message">Thao tác này sẽ đặt lại tất cả cài đặt về giá trị mặc định. Các bản sao lưu và tệp của ứng dụng sẽ không bị xoá. Tiếp tục?</string>
+    <string name="reset_settings_discard_pending">Đặt lại cài đặt sẽ huỷ các thay đổi chưa lưu. Tiếp tục?</string>
+    <string name="settings_reset">Đã đặt lại cài đặt về mặc định</string>
+    <string name="settings_reset_failed">Đặt lại cài đặt thất bại: %1$s</string>
+    <string name="share_hotspot_qr_title">Cấu hình Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">Hiển thị mã QR để điện thoại tự động kết nối</string>
+    <string name="hotspot_ssid_hint">SSID điểm phát sóng</string>
+    <string name="hotspot_pass_hint">Mật khẩu điểm phát sóng</string>
+    <string name="hotspot_qr_description">Mã QR cấu hình Wireless Helper</string>
+    <string name="scan_with_wireless_helper">Quét mã QR này bằng trình quét QR trong Wireless Helper trên điện thoại của bạn.</string>
+    <string name="share_hotspot_qr_error">Không thể lấy thông tin điểm phát Wi-Fi đang hoạt động. Hãy đảm bảo điểm phát của bạn đang bật và Vị trí được kích hoạt.</string>
+
+    <!-- Loading screen -->
+    <string name="loading_screen">Màn hình tải</string>
+    <string name="loading_screen_dialog_title">Màn hình tải tuỳ chỉnh</string>
+    <string name="loading_screen_default">Mặc định</string>
+    <string name="loading_screen_custom">Tuỳ chỉnh</string>
+    <string name="loading_screen_select_file">Chọn tệp</string>
+    <string name="loading_screen_remove">Xoá</string>
+    <string name="loading_screen_no_media">Chưa chọn phương tiện tuỳ chỉnh</string>
+    <string name="loading_screen_tap_preview">Chạm để xem trước toàn màn hình</string>
+    <string name="loading_screen_tap_fullscreen_hint">Chạm vào bản xem trước để xem toàn màn hình</string>
+    <string name="loading_screen_tap_to_close">Chạm vào bất kỳ đâu để đóng</string>
+    <string name="loading_screen_show_text">Hiển thị dòng chữ \"Android Auto đang khởi động\"</string>
+    <string name="loading_screen_keep_aspect_ratio">Giữ tỷ lệ khung hình</string>
+    <string name="loading_screen_loop_video">Lặp lại các hoạt ảnh ngắn</string>
+    <string name="loading_screen_recommendation">Độ phân giải đề xuất: %1$dx%2$d</string>
+    <string name="loading_screen_recommended_aspect_ratio">Tỷ lệ khung hình đề xuất: %1$d:%2$d</string>
+    <string name="loading_screen_supported_formats">Hỗ trợ: Hình ảnh (PNG, JPG, BMP, WEBP, GIF) \u2022 Video (MP4, MKV, WEBM, 3GP) \u2022 Tối đa: 10 MB</string>
+    <string name="loading_screen_file_error">Không thể tải tệp đã chọn</string>
+    <string name="loading_screen_file_too_large">Tệp quá lớn (tối đa 10 MB)</string>
+    <string name="loading_screen_unsupported_format">Định dạng không được hỗ trợ. Hãy dùng tệp hình ảnh hoặc video</string>
+
+    <!-- Log source -->
+    <string name="log_source">Nguồn nhật ký</string>
+    <string name="log_source_logcat">Logcat</string>
+    <string name="log_source_applog_file">Trực tiếp vào tệp</string>
+    <string name="start_log_capture_in_applog_file">Tin nhắn nhật ký chỉ được ghi vào tệp khi quá trình thu thập đang hoạt động</string>
 </resources>

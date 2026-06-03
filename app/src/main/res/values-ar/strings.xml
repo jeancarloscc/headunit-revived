@@ -535,4 +535,47 @@
     <string name="bluetooth_adapter_label">محول البلوتوث</string>
     <string name="bluetooth_adapter_description">اختر محول/وحدة تحكم البلوتوث لاستخدامها في المصافحة. مفيد للأنظمة التي تحتوي على منفذي بلوتوث.</string>
     <string name="select_bt_adapter">حدد محول البلوتوث</string>
+
+    <!-- Brightness, quick settings, key back, backup, wireless helper QR -->
+    <string name="current_brightness_reading">السطوع الحالي: %d / 255</string>
+    <string name="exit_dialog_settings">إعدادات سريعة</string>
+    <string name="key_back">رجوع</string>
+    <string name="category_backup">النسخ الاحتياطي</string>
+    <string name="export_settings">تصدير الإعدادات</string>
+    <string name="export_settings_description">حفظ نسخة احتياطية من الإعدادات كملف JSON</string>
+    <string name="export_settings_app_folder">حفظ في مجلد نسخ التطبيق</string>
+    <string name="export_settings_downloads">حفظ في التنزيلات</string>
+    <string name="export_settings_choose_location">اختر موقع الحفظ</string>
+    <string name="settings_exported">تم تصدير الإعدادات</string>
+    <string name="settings_export_failed">فشل تصدير الإعدادات: %1$s</string>
+    <string name="settings_backup_saved_to">تم حفظ النسخة الاحتياطية في:\n%1$s</string>
+    <string name="share_settings_backup">مشاركة النسخة الاحتياطية</string>
+    <string name="import_settings">استيراد الإعدادات</string>
+    <string name="import_settings_description">استعادة الإعدادات من نسخة احتياطية لـ Headunit Revived</string>
+    <string name="import_settings_app_folder">استيراد من مجلد نسخ التطبيق</string>
+    <string name="import_settings_downloads">استيراد من التنزيلات</string>
+    <string name="import_settings_choose_file">اختر ملف النسخة الاحتياطية</string>
+    <string name="import_settings_discard_pending">استيراد نسخة احتياطية سيُلغي التغييرات غير المحفوظة. هل تريد المتابعة؟</string>
+    <string name="settings_imported">تم استيراد الإعدادات: %1$d مطبَّقة، %2$d تم تجاوزها</string>
+    <string name="settings_import_failed">فشل استيراد الإعدادات: %1$s</string>
+    <string name="no_settings_backups_title">لا توجد نسخ احتياطية</string>
+    <string name="no_settings_backups_message">لم يتم العثور على أي نسخ احتياطية لـ Headunit Revived في مجلد نسخ التطبيق. قم بتصدير نسخة احتياطية أولاً ثم استوردها من هنا.</string>
+    <string name="no_settings_backups_downloads_message">لم يتم العثور على أي نسخ احتياطية لـ Headunit Revived في التنزيلات. قم بتصدير نسخة احتياطية إلى التنزيلات أولاً ثم استوردها من هنا.</string>
+    <string name="no_file_picker_title">لا يوجد منتقي ملفات</string>
+    <string name="no_file_picker_message">هذا الجهاز لا يحتوي على منتقي ملفات متوافق. يمكنك استخدام التنزيلات أو مجلد نسخ التطبيق بدلاً من ذلك.</string>
+    <string name="storage_permission_denied_backup">تم رفض إذن التخزين. تعذر استخدام التنزيلات.</string>
+    <string name="reset_settings">استعادة الإعدادات الافتراضية</string>
+    <string name="reset_settings_description">يمسح كل الإعدادات والبيانات المؤقتة وتفضيلات الاتصال التلقائي. سيتم إعادة تشغيل التطبيق لتطبيق الإعدادات الافتراضية.</string>
+    <string name="reset_settings_confirm">هل أنت متأكد من إعادة تعيين كل الإعدادات إلى قيمها الافتراضية؟ سيؤدي ذلك إلى إعادة تشغيل التطبيق.</string>
+    <string name="reset_settings_confirm_message">سيؤدي هذا إلى إعادة تعيين كل الإعدادات إلى قيمها الافتراضية. لن يتم حذف النسخ الاحتياطية أو ملفات التطبيق. هل تريد المتابعة؟</string>
+    <string name="reset_settings_discard_pending">إعادة تعيين الإعدادات ستُلغي التغييرات غير المحفوظة. هل تريد المتابعة؟</string>
+    <string name="settings_reset">تمت إعادة تعيين الإعدادات</string>
+    <string name="settings_reset_failed">فشل إعادة تعيين الإعدادات: %1$s</string>
+    <string name="share_hotspot_qr_title">تكوين Wireless Helper</string>
+    <string name="share_hotspot_qr_desc">إظهار رمز QR للاتصال التلقائي بالهاتف</string>
+    <string name="hotspot_ssid_hint">اسم نقطة الاتصال (SSID)</string>
+    <string name="hotspot_pass_hint">كلمة مرور نقطة الاتصال</string>
+    <string name="hotspot_qr_description">رمز QR لتكوين Wireless Helper</string>
+    <string name="scan_with_wireless_helper">امسح رمز QR هذا باستخدام ماسح QR في Wireless Helper على هاتفك.</string>
+    <string name="share_hotspot_qr_error">تعذر الحصول على بيانات اعتماد نقطة الاتصال النشطة. تأكد من تشغيل نقطة الاتصال وتفعيل خدمة الموقع.</string>
 </resources>

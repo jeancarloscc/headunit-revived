@@ -548,4 +548,40 @@
     <string name="hotspot_qr_description">Wireless Helper Konfigurations-QR-Code</string>
     <string name="scan_with_wireless_helper">Scanne diesen QR-Code mit dem QR-Scanner im Wireless Helper auf deinem Handy.</string>
     <string name="share_hotspot_qr_error">Hotspot-Zugangsdaten konnten nicht abgerufen werden. Bitte stelle sicher, dass der Hotspot und der Standort aktiviert sind.</string>
+
+    <!-- Brightness, quick settings, key back, backup section -->
+    <string name="current_brightness_reading">Aktuelle Helligkeit: %d / 255</string>
+    <string name="exit_dialog_settings">Schnelleinstellungen</string>
+    <string name="key_back">Zurück</string>
+    <string name="category_backup">Sicherung</string>
+    <string name="export_settings">Einstellungen exportieren</string>
+    <string name="export_settings_description">Speichere eine Sicherung der Einstellungen als JSON-Datei</string>
+    <string name="export_settings_app_folder">In App-Sicherungsordner speichern</string>
+    <string name="export_settings_downloads">In Downloads speichern</string>
+    <string name="export_settings_choose_location">Speicherort wählen</string>
+    <string name="settings_exported">Einstellungen exportiert</string>
+    <string name="settings_export_failed">Export der Einstellungen fehlgeschlagen: %1$s</string>
+    <string name="settings_backup_saved_to">Sicherung gespeichert unter:\n%1$s</string>
+    <string name="share_settings_backup">Sicherung teilen</string>
+    <string name="import_settings">Einstellungen importieren</string>
+    <string name="import_settings_description">Einstellungen aus einer Headunit Revived Sicherung wiederherstellen</string>
+    <string name="import_settings_app_folder">Aus App-Sicherungsordner importieren</string>
+    <string name="import_settings_downloads">Aus Downloads importieren</string>
+    <string name="import_settings_choose_file">Sicherungsdatei wählen</string>
+    <string name="import_settings_discard_pending">Beim Import einer Sicherung werden ungespeicherte Änderungen verworfen. Fortfahren?</string>
+    <string name="settings_imported">Einstellungen importiert: %1$d übernommen, %2$d übersprungen</string>
+    <string name="settings_import_failed">Import der Einstellungen fehlgeschlagen: %1$s</string>
+    <string name="no_settings_backups_title">Keine Sicherungen gefunden</string>
+    <string name="no_settings_backups_message">Im App-Sicherungsordner wurden keine Headunit Revived Sicherungen gefunden. Exportiere zuerst eine Sicherung und importiere sie dann von hier.</string>
+    <string name="no_settings_backups_downloads_message">In Downloads wurden keine Headunit Revived Sicherungen gefunden. Exportiere zuerst eine Sicherung nach Downloads und importiere sie dann von hier.</string>
+    <string name="no_file_picker_title">Kein Datei-Picker verfügbar</string>
+    <string name="no_file_picker_message">Dieses Gerät hat keinen kompatiblen Datei-Picker. Du kannst stattdessen Downloads oder den App-Sicherungsordner verwenden.</string>
+    <string name="storage_permission_denied_backup">Speicherberechtigung verweigert. Downloads konnten nicht verwendet werden.</string>
+    <string name="reset_settings">Auf Standardwerte zurücksetzen</string>
+    <string name="reset_settings_description">Setzt alle Einstellungen, zwischengespeicherten Daten und Auto-Connect-Präferenzen zurück. Die App wird neu gestartet, um die Werkseinstellungen zu übernehmen.</string>
+    <string name="reset_settings_confirm">Möchtest du wirklich alle Einstellungen auf die Standardwerte zurücksetzen? Die App wird dadurch neu gestartet.</string>
+    <string name="reset_settings_confirm_message">Dadurch werden alle Einstellungen auf die Standardwerte zurückgesetzt. Sicherungen und App-Dateien werden nicht gelöscht. Fortfahren?</string>
+    <string name="reset_settings_discard_pending">Beim Zurücksetzen werden ungespeicherte Änderungen verworfen. Fortfahren?</string>
+    <string name="settings_reset">Einstellungen auf Standardwerte zurückgesetzt</string>
+    <string name="settings_reset_failed">Zurücksetzen der Einstellungen fehlgeschlagen: %1$s</string>
 </resources>
