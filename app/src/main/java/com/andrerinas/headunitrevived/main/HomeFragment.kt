@@ -41,6 +41,7 @@ import com.andrerinas.headunitrevived.utils.VpnControl
 import com.andrerinas.headunitrevived.utils.BluetoothHelper
 import com.andrerinas.headunitrevived.connection.UsbReceiver
 import com.andrerinas.headunitrevived.connection.UsbAccessoryMode
+import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
 
@@ -391,10 +392,17 @@ class HomeFragment : Fragment() {
                 } else {
                     if (usbManager.hasPermission(device.wrappedDevice)) {
                         val usbMode = UsbAccessoryMode(usbManager)
-                        if (usbMode.connectAndSwitch(device.wrappedDevice)) {
-                            Toast.makeText(requireContext(), R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(requireContext(), R.string.switch_failed, Toast.LENGTH_SHORT).show()
+                        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                            val success = usbMode.connectAndSwitch(device.wrappedDevice)
+                            withContext(Dispatchers.Main) {
+                                context?.let { ctx ->
+                                    if (success) {
+                                        Toast.makeText(ctx, R.string.switching_to_android_auto, Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(ctx, R.string.switch_failed, Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
                         }
                     } else {
                         Toast.makeText(requireContext(), R.string.requesting_usb_permission, Toast.LENGTH_SHORT).show()
