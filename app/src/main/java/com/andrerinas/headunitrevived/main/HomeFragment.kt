@@ -230,7 +230,7 @@ class HomeFragment : Fragment() {
                     Toast.makeText(requireContext(), getString(R.string.auto_connecting_to, ip), Toast.LENGTH_SHORT).show()
                     val ctx = requireContext()
                     lifecycleScope.launch(Dispatchers.IO) { App.provide(ctx).commManager.connect(ip, 5277) }
-                    ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
+                    ContextCompat.startForegroundService(ctx, Intent(ctx, AapService::class.java).apply {
                         action = AapService.ACTION_CONNECT_SOCKET
                     })
                     true
