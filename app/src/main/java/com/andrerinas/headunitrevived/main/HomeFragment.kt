@@ -382,7 +382,10 @@ class HomeFragment : Fragment() {
             if (androidDevices.size == 1) {
                 val device = UsbDeviceCompat(androidDevices[0])
                 AppLog.i("USB button: Single device found - ${device.uniqueName}, auto-connecting")
-                (requireActivity() as? MainActivity)?.beginAutoConnect("USB button auto-connect")
+                (requireActivity() as? MainActivity)?.beginAutoConnect(
+                    "USB button auto-connect",
+                    MainActivity.ConnectionUiMode.OVERLAY
+                )
 
                 if (device.isInAccessoryMode) {
                     ContextCompat.startForegroundService(requireContext(),

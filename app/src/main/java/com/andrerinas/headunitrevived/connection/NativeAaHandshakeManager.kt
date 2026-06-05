@@ -113,8 +113,12 @@ class NativeAaHandshakeManager(
                         }
                     }
                 }
-            } catch (e: IOException) {
-                if (isRunning) AppLog.d("NativeAA: AA Server socket closed: ${e.message}")
+            } catch (e: Exception) {
+                if (isRunning) {
+                    AppLog.e("NativeAA: AA Server socket error: ${e.message}", e)
+                } else {
+                    AppLog.d("NativeAA: AA Server socket closed cleanly.")
+                }
             }
         }
 
@@ -131,8 +135,12 @@ class NativeAaHandshakeManager(
                         }
                     }
                 }
-            } catch (e: IOException) {
-                if (isRunning) AppLog.d("NativeAA: HFP Server socket closed: ${e.message}")
+            } catch (e: Exception) {
+                if (isRunning) {
+                    AppLog.e("NativeAA: HFP Server socket error: ${e.message}", e)
+                } else {
+                    AppLog.d("NativeAA: HFP Server socket closed cleanly.")
+                }
             }
         }
     }

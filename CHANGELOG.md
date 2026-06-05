@@ -1,5 +1,5 @@
 # Changelog
-### v.3.0.0-beta1
+### v.3.0.0-beta
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
 - Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default
 - Removed: Old deprecated ssl library written in C-Code for better maintenance, stability and smaller file sizes
@@ -13,6 +13,8 @@
 - Fixed: BT auto-connect dragging phone into wireless flow during USB session, thanks to @andrecuellar
 - Persist Auto-Optimize wizard settings synchronously, thanks to @andrecuellar
 - Added ability to swipe with two fingers from the right side to switch fullscreen mode and Normal (all bars) mode, thanks to @Anton111111
+- Improved: usb button auto connect, thanks to @bezprobeloff
+- Catched an fatal error listed in the play console
 
 ### v.2.3.1
 - Fixed a connection lost on for example borders
