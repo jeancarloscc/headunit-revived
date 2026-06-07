@@ -645,12 +645,20 @@ class VideoDecoder(private val settings: Settings) {
         val infos = codecInfos.filter { !it.isEncoder && it.supportedTypes.any { t -> t.equals(mimeType, true) } }
         val hw = infos.find { isHardwareAccelerated(it.name) }
         val sw = infos.find { !isHardwareAccelerated(it.name) }
-        return if (preferHardware && hw != null) hw.name else sw?.name ?: hw?.name
+        val selected = if (preferHardware && hw != null) hw.name else sw?.name ?: hw?.name
+        AppLog.i("findBestCodec: hw=${hw?.name}, sw=${sw?.name}, preferHardware=$preferHardware, selected=$selected")
+        return selected
     }
 
     private fun isHardwareAccelerated(name: String): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
+            val info = codecList.codecInfos.find { it.name.equals(name, ignoreCase = true) }
+            if (info != null) return info.isHardwareAccelerated
+        }
         val lower = name.lowercase(Locale.ROOT)
-        return !(lower.startsWith("omx.google.") || lower.startsWith("c2.android.") || lower.contains(".sw.") || lower.contains("software"))
+        return !(lower.startsWith("omx.google.") || lower.startsWith("c2.android.") ||
+                lower.startsWith("omx.ffmpeg.") || lower.contains(".sw.") || lower.contains("software"))
     }
 }
 
