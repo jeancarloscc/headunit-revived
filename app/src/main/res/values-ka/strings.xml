@@ -493,7 +493,7 @@
     <string name="wait_for_wifi">WiFi-ს მოლოდინი WiFi Direct-ის წინ</string>
     <string name="wait_for_wifi_description">ჩატვირთვისას, WiFi-ს დაკავშირების მოლოდინი WiFi Direct-ის გაშვებამდე. ჩართეთ ეს ფუნქცია, თუ თქვენს მონიტორს ჩართვის შემდეგ სჭირდება რამდენიმე წამი WiFi-სთან დასაკავშირებლად.</string>
     <string name="wait_for_wifi_timeout">WiFi-ს მოლოდინის ტაიმაუტი</string>
-    <string name="wireless_24ghz_warning">შენიშვნა: უ線ო Android Auto 2.4GHz მოწყობილობებზე შეიძლება იწვევდეს დაყოვნებას, კადრების გაჭედვას და გათიშვას. პრობლემების შემთხვევაში, გთხოვთ, შეამოწმოთ კავშირი USB კაბელით, რათა დარწმუნდეთ, არის თუ არა ეს ქსელის შეზღუდვა.</string>
+    <string name="wireless_24ghz_warning">შენიშვნა: უსადენო Android Auto 2.4GHz მოწყობილობებზე შეიძლება იწვევდეს დაყოვნებას, კადრების გაჭედვას და გათიშვას. პრობლემების შემთხვევაში, გთხოვთ, შეამოწმოთ კავშირი USB კაბელით, რათა დარწმუნდეთ, არის თუ არა ეს ქსელის შეზღუდვა.</string>
     <string name="fake_speed_title">ვიდეოს ბლოკირების მოხსნა (Fake Speed)</string>
     <string name="fake_speed_description">ტელეფონს გადასცემს მუდმივ დაბალ სიჩქარეს (0.5 მ/წმ), რათა თავიდან აიცილოს ვიდეო კონტენტის დაბლოკვა მართვის დროს. გამოიყენეთ სიფრთხილით.</string>
     <string name="wireless_mode_helper">Wireless Helper</string>
