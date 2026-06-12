@@ -216,7 +216,7 @@
     <string name="category_video">ვიდეო</string>
     <string name="force_software_decoding">პროგრამული დეკოდირების იძულება</string>
     <string name="force_software_decoding_description">შეიძლება გამოასწოროს პრობლემები ზოგიერთ მოწყობილობაზე, თუმცა ნაკლებად წარმადია</string>
-    <string name="wireless_mode">უ線ო რეჟიმი</string>
+    <string name="wireless_mode">უსადენო რეჟიმი</string>
     <string name="wireless_mode_description">აირჩიეთ, როგორ დაუკავშირდეს აპი უ線ოდ (მექანიკური სია, ტელეფონის ავტო-ძებნა ან Wireless Launcher რეჟიმი)</string>
     <string-array name="wireless_connection_modes">
         <item>მექანიკური (სია)</item>
