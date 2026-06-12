@@ -201,7 +201,7 @@
     <string name="open_settings">პარამეტრები</string>
     <string name="right_hand_drive">მარჯვენასაჭიანი მართვა</string>
     <string name="right_hand_drive_description">ინტერფეისის მორგება მარჯვენა საჭის მქონე ავტომობილებისთვის</string>
-    <string name="wireless_connection_settings">უ線ო კავშირი</string>
+    <string name="wireless_connection_settings">უსადენო კავშირი</string>
     <string name="category_graphic">გრაფიკა</string>
     <string name="custom_insets">საკუთარი ჩანართები (Insets / Margins)</string>
     <string name="inset_top">ზემოთ</string>
