@@ -935,10 +935,51 @@ class AapService : Service(), UsbReceiver.Listener {
             AppLog.i("AapService: Skipping projection launch because PiP is active")
             return
         }
-        startActivity(AapProjectionActivity.intent(this).apply {
+
+        val intent = AapProjectionActivity.intent(this).apply {
             putExtra(AapProjectionActivity.EXTRA_FOCUS, true)
             addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-        })
+        }
+
+        val canOverlay = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && AndroidSettings.canDrawOverlays(this)
+        when (ActivityLaunchPolicy.chooseLaunchStrategy(Build.VERSION.SDK_INT, canOverlay)) {
+            ActivityLaunchPolicy.LaunchStrategy.DIRECT -> {
+                try { startActivity(intent) }
+                catch (e: Exception) { AppLog.e("Projection launch failed: ${e.message}") }
+            }
+            ActivityLaunchPolicy.LaunchStrategy.OVERLAY -> {
+                if (!launchViaOverlayTrampoline(intent)) {
+                    AppLog.w("Projection overlay trampoline failed, trying direct")
+                    try { startActivity(intent) }
+                    catch (e: Exception) { AppLog.e("Projection direct fallback failed: ${e.message}") }
+                }
+            }
+            ActivityLaunchPolicy.LaunchStrategy.NOTIFICATION -> launchProjectionViaNotification(intent)
+        }
+    }
+
+    private fun launchProjectionViaNotification(launchIntent: Intent) {
+        val piFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        val fullScreenPi = PendingIntent.getActivity(this, PROJECTION_LAUNCH_NOTIFICATION_ID, launchIntent, piFlags)
+
+        val notification = NotificationCompat.Builder(this, App.bootStartChannel)
+            .setSmallIcon(R.drawable.ic_stat_aa)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.android_auto_starting))
+            .setFullScreenIntent(fullScreenPi, true)
+            .setContentIntent(fullScreenPi)
+            .setAutoCancel(true)
+            .build()
+
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.notify(PROJECTION_LAUNCH_NOTIFICATION_ID, notification)
+        serviceScope.launch {
+            delay(5000)
+            nm.cancel(PROJECTION_LAUNCH_NOTIFICATION_ID)
+        }
     }
 
     private fun setupMediaSession() {
@@ -2214,6 +2255,14 @@ class AapService : Service(), UsbReceiver.Listener {
     }
 
     private fun launchViaOverlayTrampoline(): Boolean {
+        val launchIntent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
+        }
+        return launchViaOverlayTrampoline(launchIntent)
+    }
+
+    private fun launchViaOverlayTrampoline(launchIntent: Intent): Boolean {
         val wm = getSystemService(WINDOW_SERVICE) as WindowManager
         val overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -2231,15 +2280,11 @@ class AapService : Service(), UsbReceiver.Listener {
         val view = View(this)
         return try {
             wm.addView(view, params)
-            val launchIntent = Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                putExtra(MainActivity.EXTRA_LAUNCH_SOURCE, "Boot auto-start")
-            }
             startActivity(launchIntent)
-            AppLog.i("Boot auto-start: startActivity called from overlay context")
+            AppLog.i("Overlay trampoline: startActivity succeeded")
             true
         } catch (e: Exception) {
-            AppLog.e("Boot auto-start: overlay trampoline failed: ${e.message}")
+            AppLog.e("Overlay trampoline failed: ${e.message}")
             false
         } finally {
             try { wm.removeView(view) } catch (_: Exception) {}
@@ -2525,6 +2570,7 @@ class AapService : Service(), UsbReceiver.Listener {
         val scanningState = MutableStateFlow(false)
 
         private const val BOOT_START_NOTIFICATION_ID = 42
+        private const val PROJECTION_LAUNCH_NOTIFICATION_ID = 43
 
         // Service action strings used with startService() and sendBroadcast()
         const val ACTION_START_SELF_MODE           = "com.andrerinas.headunitrevived.ACTION_START_SELF_MODE"

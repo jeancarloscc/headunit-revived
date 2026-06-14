@@ -30,16 +30,20 @@ class UsbDeviceCompat(val wrappedDevice: UsbDevice) {
         fun getUniqueName(device: UsbDevice): String {
             val vendorId = device.vendorId
             val productId = device.productId
+            val vidPid = "${Utils.hex_get(vendorId.toShort())}:${Utils.hex_get(productId.toShort())}"
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 val manufacturer = device.manufacturerName?.takeIf { it.isNotBlank() }
                 val product = device.productName?.takeIf { it.isNotBlank() }
                 if (manufacturer != null || product != null) {
-                    return listOfNotNull(manufacturer, product).joinToString(" ")
+                    // Include VID:PID so devices with identical strings but different
+                    // hardware (e.g. internal multimedia module vs external phone) are
+                    // treated as distinct entries.
+                    return "${listOfNotNull(manufacturer, product).joinToString(" ")} ($vidPid)"
                 }
             }
 
-            return "${Utils.hex_get(vendorId.toShort())}:${Utils.hex_get(productId.toShort())}"
+            return vidPid
         }
 
         fun isInAccessoryMode(device: UsbDevice): Boolean {
