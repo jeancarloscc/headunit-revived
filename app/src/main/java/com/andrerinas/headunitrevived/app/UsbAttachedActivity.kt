@@ -26,22 +26,46 @@ import com.andrerinas.headunitrevived.utils.Settings
 
 class UsbAttachedActivity : Activity() {
 
+    enum class DeviceSource { FROM_INTENT, FROM_FALLBACK, AMBIGUOUS }
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
     }
 
     private fun resolveUsbDevice(intent: Intent?): UsbDevice? {
-        DeviceIntent(intent).device?.let { return it }
-
         val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-        val devices = usbManager.deviceList.values.filter { UsbDeviceCompat.isAndroidDevice(it) }
-        return if (devices.size == 1) {
-            val device = devices[0]
-            AppLog.i("No USB device in intent extras, falling back to single device from deviceList: ${UsbDeviceCompat(device).uniqueName}")
-            device
-        } else {
-            AppLog.e("No USB device in intent extras and ${devices.size} Android devices in deviceList, cannot determine target")
-            null
+        val androidDevices = usbManager.deviceList.values.filter { UsbDeviceCompat.isAndroidDevice(it) }
+        return resolveDevice(intent, androidDevices)
+    }
+
+    companion object {
+        /**
+         * Determines which USB device to act on given the intent extras and the current
+         * USB device list. Extracted for testability — the caller must pass both pieces
+         * so tests can verify the logic without an Android Context.
+         */
+        @JvmStatic
+        internal fun resolveDevice(intent: Intent?, androidDevices: Collection<UsbDevice>): UsbDevice? {
+            DeviceIntent(intent).device?.let { return it }
+            return when (androidDevices.size) {
+                1 -> {
+                    val device = androidDevices.first()
+                    AppLog.i("No USB device in intent extras, falling back to single device: ${UsbDeviceCompat(device).uniqueName}")
+                    device
+                }
+                else -> {
+                    AppLog.e("No USB device in intent extras and ${androidDevices.size} Android devices present, cannot determine target")
+                    null
+                }
+            }
+        }
+
+        /** Pure decision logic extracted for unit testing. */
+        @JvmStatic
+        internal fun pickDeviceSource(intentHasDevice: Boolean, fallbackCount: Int): DeviceSource = when {
+            intentHasDevice -> DeviceSource.FROM_INTENT
+            fallbackCount == 1 -> DeviceSource.FROM_FALLBACK
+            else -> DeviceSource.AMBIGUOUS
         }
     }
 
@@ -146,7 +170,7 @@ class UsbAttachedActivity : Activity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        val device = resolveUsbDevice(getIntent())
+        val device = resolveUsbDevice(intent)
         if (device == null || !UsbDeviceCompat.isAndroidDevice(device)) {
             if (device != null) {
                 AppLog.i("Ignoring non-Android USB device in onNewIntent (VID: ${device.vendorId}): ${device.deviceName}")

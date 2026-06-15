@@ -115,10 +115,7 @@ class UsbListFragment : Fragment() {
             }
             holder.itemView.setBackgroundResource(bgRes)
 
-            holder.startButton.text = Html.fromHtml(String.format(
-                    java.util.Locale.US, "<b>%1\$s</b><br/>%2\$s",
-                    device.uniqueName, device.deviceName
-            ))
+            holder.startButton.text = device.uniqueName
             holder.startButton.tag = position
             holder.startButton.setOnClickListener(this)
 
