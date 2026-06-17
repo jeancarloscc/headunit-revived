@@ -527,8 +527,6 @@
     <string name="wifi_autostart_content">Подключено к %s. Нажмите, чтобы запустить Android Auto.</string>
 
     <!-- New strings merged from 2.3.1 -->
-    <string name="use_native_ssl">Использовать Native SSL</string>
-    <string name="use_native_ssl_description">Использовать нативную библиотеку OpenSSL (быстрее на старых устройствах). Требуется перезапуск.</string>
     <string name="bt_devices_selected">устройств выбрано</string>
     <string name="static_audio_focus">Статический аудиофокус</string>
     <string name="static_audio_focus_description">Принудительно заставляет телефон считать, что аудиофокус удерживается постоянно, предотвращая потерю маршрутизации звука на универсальных магнитолах. Также выполняет программное приглушение звука (ducking) во время голосовых подсказок навигатора.</string>

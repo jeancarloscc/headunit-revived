@@ -538,8 +538,6 @@
     <string name="wifi_autostart_content">Verbunden mit %s. Tippen, um Android Auto zu starten.</string>
 
     <!-- New strings merged from 2.3.1 -->
-    <string name="use_native_ssl">Native SSL nutzen</string>
-    <string name="use_native_ssl_description">Nutze native OpenSSL Bibliothek (schneller auf alten Geräten). Neustart erforderlich.</string>
     <string name="bt_devices_selected">Geräte ausgewählt</string>
     <string name="bluetooth_adapter_label">Bluetooth-Adapter</string>
     <string name="bluetooth_adapter_description">Wähle den Bluetooth-Adapter/Controller für den Handshake aus. Nützlich bei Systemen mit zwei Bluetooth-Modulen.</string>
