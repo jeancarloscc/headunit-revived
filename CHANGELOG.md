@@ -1,4 +1,8 @@
 # Changelog
+### v.3.0.1
+- Added: Projection on second screen option (untested)
+- Fixed: Loading screen couldn't be replaced
+
 ### v.3.0.0
 - Added: Custom loading screen (image/GIF/video), thanks to @andrecuellar
 - Added: Settings-Reset Button, if you mess up something in the settings, you can now reset them to default

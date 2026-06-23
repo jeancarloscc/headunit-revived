@@ -51,6 +51,26 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         @SuppressLint("MissingPermission")
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
+                WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION -> {
+                    val state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1)
+                    AppLog.i("WifiDirectManager: WIFI_P2P_STATE_CHANGED_ACTION state=$state")
+                    if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+                        val appSettings = com.andrerinas.headunitrevived.App.provide(context).settings
+                        val commManager = com.andrerinas.headunitrevived.App.provide(context).commManager
+                        val isConnectingOrConnected = commManager.isConnected ||
+                            commManager.connectionState.value is com.andrerinas.headunitrevived.connection.CommManager.ConnectionState.Connecting
+                        
+                        if (!isConnected && !isConnectingOrConnected) {
+                            if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
+                                AppLog.i("WifiDirectManager: P2P enabled, auto-starting WiFi Direct visibility")
+                                makeVisible()
+                            } else if (appSettings.wifiConnectionMode == 3) {
+                                AppLog.i("WifiDirectManager: P2P enabled, auto-starting Native AA quiet host")
+                                startNativeAaQuietHost()
+                            }
+                        }
+                    }
+                }
                 WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION -> {
                     val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE, WifiP2pDevice::class.java)
@@ -79,6 +99,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
                             }
                         }
                         manager?.requestConnectionInfo(channel, this@WifiDirectManager)
+                        AapService.scanningState.value = false
                     } else {
                         isConnected = false
                     }
@@ -117,6 +138,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         if (isReceiverRegistered) return
         try {
             val filter = IntentFilter().apply {
+                addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
                 addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
                 addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
             }
@@ -132,6 +154,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     override fun onConnectionInfoAvailable(info: WifiP2pInfo) {
         if (info.groupFormed) {
             isConnected = true
+            AapService.scanningState.value = false
             isGroupOwner = info.isGroupOwner
             
             val goIp = info.groupOwnerAddress?.hostAddress ?: "unknown"
@@ -464,9 +487,25 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private fun startDiscovery() {
         val ch = channel
         if (ch != null) {
+            val appSettings = com.andrerinas.headunitrevived.App.provide(context).settings
+            if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
+                AapService.scanningState.value = true
+            }
             manager?.discoverPeers(ch, object : WifiP2pManager.ActionListener {
-                override fun onSuccess() { AppLog.d("WifiDirectManager: Discovery active") }
-                override fun onFailure(reason: Int) { AppLog.w("WifiDirectManager: Discovery failed: $reason") }
+                override fun onSuccess() { 
+                    AppLog.d("WifiDirectManager: Discovery active")
+                    if (appSettings.wifiConnectionMode == 2 && appSettings.helperConnectionStrategy == 1) {
+                        handler.postDelayed({
+                            if (!isConnected) {
+                                AapService.scanningState.value = false
+                            }
+                        }, 2500L)
+                    }
+                }
+                override fun onFailure(reason: Int) { 
+                    AppLog.w("WifiDirectManager: Discovery failed: $reason")
+                    AapService.scanningState.value = false
+                }
             })
         }
     }
@@ -706,7 +745,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
 
     fun stop() {
         AppLog.i("WifiDirectManager: Stopping and cleaning up...")
-        handler.removeCallbacks(discoveryRunnable)
+        handler.removeCallbacksAndMessages(null)
+        AapService.scanningState.value = false
         try { context.unregisterReceiver(receiver) } catch (e: Exception) {}
         if (isGroupOwner) {
             manager?.removeGroup(channel, object : WifiP2pManager.ActionListener {
