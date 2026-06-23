@@ -1,7 +1,7 @@
 # Changelog
 ### v.3.0.1-alpha
 - Fixed: App Exit on Disconnect
-- Enhanced: USB Workflow. This will hopefully eleminate some random usb disconnects
+- Enhanced: USB Workflow. This will hopefully eliminate some random usb disconnects
 - Fixed keyboard input on Android < 6 Devices
 - Enhanced WiFi Direct-Mode
 - Enhanced File Selector for some devices
